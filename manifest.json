@@ -3,7 +3,7 @@
   "name": "Visible Form Autofill",
   "version": "1.0.0",
   "description": "Autofills only visible and interactable form fields for frontend testing.",
-  "permissions": ["activeTab", "scripting"],
+  "permissions": ["activeTab", "scripting", "storage"],
   "action": {
     "default_title": "Visible Autofill",
     "default_popup": "popup/popup.html"
@@ -15,6 +15,9 @@
         "utils/visibility.js",
         "utils/interactable.js",
         "utils/viewport.js",
+        "data/dataset-manager.js",
+        "data/random-generator.js",
+        "data/field-detector.js",
         "content/autofill.js",
         "content/content-script.js"
       ],

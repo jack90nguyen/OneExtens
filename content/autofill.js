@@ -13,44 +13,82 @@
     element.dispatchEvent(new Event("change", { bubbles: true }));
   }
 
-  function setInputValue(input, radioState) {
-    const type = (input.type || "text").toLowerCase();
+  function shouldSkipSelectOption(option) {
+    if (!option || option.disabled) {
+      return true;
+    }
 
-    if (type === "hidden" || type === "file") {
+    const value = String(option.value || "").trim().toLowerCase();
+    const label = String(option.textContent || "").trim().toLowerCase();
+    if (!value) {
+      return true;
+    }
+
+    const placeholderTerms = ["select", "choose", "please select", "--select--"];
+    return placeholderTerms.some((term) => label === term || value === term);
+  }
+
+  function pickRandomSelectableIndex(select, randomApi) {
+    const indexes = [];
+    for (let i = 0; i < select.options.length; i += 1) {
+      if (!shouldSkipSelectOption(select.options[i])) {
+        indexes.push(i);
+      }
+    }
+
+    if (!indexes.length) {
+      return -1;
+    }
+
+    const pick = randomApi && typeof randomApi.randomItem === "function" ? randomApi.randomItem(indexes) : indexes[0];
+    return Number.isFinite(pick) ? pick : indexes[0];
+  }
+
+  function setInputValue(input, radioState, context) {
+    const detectedType = context.detectFieldType(input);
+    const rawType = (input.type || "text").toLowerCase();
+
+    if (rawType === "hidden" || rawType === "file") {
       return false;
     }
 
-    if (type === "checkbox") {
-      if (!input.checked) {
-        input.checked = true;
+    if (detectedType === "checkbox") {
+      const nextChecked = context.randomBoolean();
+      if (input.checked !== nextChecked) {
+        input.checked = nextChecked;
         dispatchFieldEvents(input);
       }
       return true;
     }
 
-    if (type === "radio") {
+    if (detectedType === "radio") {
       const groupName = input.name || `__no_name__${radioState.unnamedIndex++}`;
       if (radioState.processedGroups.has(groupName)) {
         return false;
       }
 
       radioState.processedGroups.add(groupName);
-      if (!input.checked) {
-        input.checked = true;
-        dispatchFieldEvents(input);
+      const scope = input.form || document;
+      const group = input.name
+        ? Array.from(scope.querySelectorAll('input[type="radio"]')).filter((el) => {
+            if (!(el instanceof HTMLInputElement)) return false;
+            if (el.name !== input.name) return false;
+            return shouldFill(el);
+          })
+        : [input];
+
+      const chosen = group.length ? context.randomItem(group) : input;
+      if (chosen && chosen instanceof HTMLInputElement && !chosen.checked) {
+        chosen.checked = true;
+        dispatchFieldEvents(chosen);
       }
       return true;
     }
 
-    const valueByType = {
-      email: "test@example.com",
-      password: "123456",
-      number: "123",
-      search: "test",
-      text: "test"
-    };
-
-    const nextValue = valueByType[type] ?? "test";
+    const nextValue = context.generateValue(detectedType, {
+      field: input,
+      sessionCache: context.sessionCache
+    });
     if (input.value !== nextValue) {
       input.value = nextValue;
       dispatchFieldEvents(input);
@@ -58,13 +96,16 @@
     return true;
   }
 
-  function setFieldValue(field, radioState) {
+  function setFieldValue(field, radioState, context) {
     if (field instanceof HTMLInputElement) {
-      return setInputValue(field, radioState);
+      return setInputValue(field, radioState, context);
     }
 
     if (field instanceof HTMLTextAreaElement) {
-      const nextValue = "test content";
+      const nextValue = context.generateValue("paragraph", {
+        field,
+        sessionCache: context.sessionCache
+      });
       if (field.value !== nextValue) {
         field.value = nextValue;
         dispatchFieldEvents(field);
@@ -77,7 +118,11 @@
         return false;
       }
 
-      const nextIndex = field.options.length > 1 ? 1 : 0;
+      const nextIndex = pickRandomSelectableIndex(field, context.randomApi);
+      if (nextIndex < 0) {
+        return false;
+      }
+
       if (field.selectedIndex !== nextIndex) {
         field.selectedIndex = nextIndex;
         dispatchFieldEvents(field);
@@ -130,9 +175,63 @@
     return modalFields.length ? modalFields : eligible;
   }
 
-  function runAutofill() {
+  async function runAutofill() {
     const fields = Array.from(document.querySelectorAll(FIELD_SELECTOR));
     const targetFields = getTargetFields(fields);
+
+    const dataApi = window.__autofillData || {};
+    const detectorApi = window.__autofillDetector || {};
+    const randomApi = window.__autofillRandom || {};
+
+    const datasets =
+      typeof dataApi.getEffectiveDatasets === "function"
+        ? await dataApi.getEffectiveDatasets()
+        : {
+            text: ["test"],
+            email: ["test@example.com"],
+            company: ["Example Company"],
+            address: ["123 Test Street"],
+            phone: ["+10000000000"],
+            url: ["https://example.com"],
+            paragraph: "test content",
+            minWords: 10,
+            maxWords: 40
+          };
+
+    const sessionCache = {
+      text: new Set(),
+      email: new Set(),
+      phone: new Set(),
+      company: new Set(),
+      address: new Set(),
+      url: new Set()
+    };
+
+    const context = {
+      sessionCache,
+      randomApi,
+      detectFieldType: (field) =>
+        typeof detectorApi.detectFieldType === "function" ? detectorApi.detectFieldType(field) : "text",
+      randomBoolean: () =>
+        typeof randomApi.randomBoolean === "function" ? randomApi.randomBoolean() : Math.random() >= 0.5,
+      randomItem: (list) =>
+        typeof randomApi.randomItem === "function" ? randomApi.randomItem(list) : (Array.isArray(list) ? list[0] : null),
+      generateValue: (type, meta) => {
+        if (typeof randomApi.generateValue === "function") {
+          return randomApi.generateValue(type, datasets, meta || {});
+        }
+
+        if (type === "email") return datasets.email[0] || "test@example.com";
+        if (type === "password") return "123456";
+        if (type === "number") return "123";
+        if (type === "phone") return datasets.phone[0] || "+10000000000";
+        if (type === "url") return datasets.url[0] || "https://example.com";
+        if (type === "company") return datasets.company[0] || "Example Company";
+        if (type === "address") return datasets.address[0] || "123 Test Street";
+        if (type === "paragraph") return "test content";
+        return datasets.text[0] || "test";
+      }
+    };
 
     const radioState = {
       processedGroups: new Set(),
@@ -141,7 +240,7 @@
 
     let filledCount = 0;
     for (const field of targetFields) {
-      if (setFieldValue(field, radioState)) {
+      if (setFieldValue(field, radioState, context)) {
         filledCount += 1;
       }
     }

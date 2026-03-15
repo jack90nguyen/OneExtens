@@ -18,19 +18,45 @@ It is designed for frontend testing on real pages with overlays/modals, and avoi
   - Popup button
   - Keyboard shortcut: `Alt + F`
 - Dispatches `input` and `change` events for SPA compatibility (React/Vue/Angular)
+- Randomized natural data generation with layered data sources:
+  1. user dataset (`chrome.storage.sync`)
+  2. extension defaults
+  3. built-in fallback values
+- Popup dataset editor (names, emails, phones, addresses, companies, urls, paragraph, min/max words)
+- Duplicate prevention cache per autofill session for key text-like datasets
+- Additional randomized field support:
+  - `input[type=date]` random date in the last 5 years
+  - `input[type=url]` from URL dataset
+  - `input[type=tel]` natural/random phone formats
+  - `input[type=number]` random in field min/max or default range `1..999`
 
 ## Autofill Rules
 
 | Field | Value |
 |---|---|
-| text | `test` |
-| email | `test@example.com` |
+| text | random item from names dataset |
+| email | random email dataset item or generated `firstname.lastname@domain` |
 | password | `123456` |
-| number | `123` |
-| checkbox | checked |
-| radio | first visible option per group |
-| textarea | `test content` |
-| select | option index `1` (or `0` if only one option) |
+| number | random number in min/max range |
+| checkbox | random boolean (50/50) |
+| radio | one random visible radio in the group |
+| textarea | random paragraph slice (`minWords`..`maxWords`) |
+| select | random valid option (skips disabled/placeholder) |
+| date | random date in last 5 years |
+| url | random URL dataset item |
+| tel | random phone dataset item or generated phone format |
+
+### Smart Field Detection
+
+The extension detects semantic field types using:
+- input `type`
+- attribute heuristics from `name`, `id`, `placeholder`, `aria-label`, `autocomplete`
+
+Examples:
+- `customer_email` -> email dataset
+- `billing_address` -> address dataset
+- `company_name` -> company dataset
+- `contact_phone` -> phone dataset
 
 ## Project Structure
 
@@ -40,6 +66,10 @@ autofill-extension/
   content/
     content-script.js
     autofill.js
+  data/
+    dataset-manager.js
+    random-generator.js
+    field-detector.js
   utils/
     visibility.js
     interactable.js
@@ -61,6 +91,9 @@ autofill-extension/
 - Open any page with forms.
 - Click the extension icon and press **Autofill Active Page**.
 - Or press `Alt + F` while the page is focused.
+- Use the **Dataset Editor** in the popup to customize test data.
+- Click **Save Dataset** to persist custom values in `chrome.storage.sync`.
+- Click **Restore Defaults** to reset back to extension defaults.
 
 Popup status reports:
 - `scanned`: total discovered fields
