@@ -17,6 +17,7 @@ It is designed for frontend testing on real pages with overlays/modals, and avoi
 - Trigger methods:
   - Click extension icon to autofill active page
   - Keyboard shortcut: `Alt + Shift + F`
+- Error-only feedback: successful runs are silent; failures show an alert on the active tab
 - Dispatches `input` and `change` events for SPA compatibility (React/Vue/Angular)
 - Randomized natural data generation with layered data sources:
   1. user dataset (`chrome.storage.sync`)
@@ -94,6 +95,7 @@ autofill-extension/
 - Click the extension icon to run autofill on the active page.
 - Or press `Alt + Shift + F` while the page is focused.
 - To customize dataset values, right click extension icon -> **Options**.
+- Autofill success has no popup/status message; only errors are alerted.
 - Click **Save Dataset** to persist custom values in `chrome.storage.sync`.
 - Click **Restore Defaults** to reset back to extension defaults.
 
