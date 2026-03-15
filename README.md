@@ -15,14 +15,14 @@ It is designed for frontend testing on real pages with overlays/modals, and avoi
   3. In-viewport check
 - Modal-priority mode (if modal containers exist, fields inside them are prioritized)
 - Trigger methods:
-  - Popup button
-  - Keyboard shortcut: `Alt + F`
+  - Click extension icon to autofill active page
+  - Keyboard shortcut: `Alt + Shift + F`
 - Dispatches `input` and `change` events for SPA compatibility (React/Vue/Angular)
 - Randomized natural data generation with layered data sources:
   1. user dataset (`chrome.storage.sync`)
   2. extension defaults
   3. built-in fallback values
-- Popup dataset editor (names, emails, phones, addresses, companies, urls, paragraph, min/max words)
+- Options page dataset editor (names, emails, phones, addresses, companies, urls, paragraph, min/max words)
 - Duplicate prevention cache per autofill session for key text-like datasets
 - Additional randomized field support:
   - `input[type=date]` random date in the last 5 years
@@ -63,6 +63,8 @@ Examples:
 ```text
 autofill-extension/
   manifest.json
+  background/
+    service-worker.js
   content/
     content-script.js
     autofill.js
@@ -74,9 +76,9 @@ autofill-extension/
     visibility.js
     interactable.js
     viewport.js
-  popup/
-    popup.html
-    popup.js
+  options/
+    options.html
+    options.js
 ```
 
 ## Install (Load Unpacked)
@@ -89,16 +91,11 @@ autofill-extension/
 ## Usage
 
 - Open any page with forms.
-- Click the extension icon and press **Autofill Active Page**.
-- Or press `Alt + F` while the page is focused.
-- Use the **Dataset Editor** in the popup to customize test data.
+- Click the extension icon to run autofill on the active page.
+- Or press `Alt + Shift + F` while the page is focused.
+- To customize dataset values, right click extension icon -> **Options**.
 - Click **Save Dataset** to persist custom values in `chrome.storage.sync`.
 - Click **Restore Defaults** to reset back to extension defaults.
-
-Popup status reports:
-- `scanned`: total discovered fields
-- `eligible`: fields that passed all checks
-- `filled`: fields updated with test values
 
 ## Validation Scenarios
 

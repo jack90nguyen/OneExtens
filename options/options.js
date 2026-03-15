@@ -1,4 +1,3 @@
-const runButton = document.getElementById("runAutofill");
 const statusEl = document.getElementById("status");
 const saveButton = document.getElementById("saveDataset");
 const restoreButton = document.getElementById("restoreDefaults");
@@ -15,7 +14,6 @@ const datasetFields = {
   maxWords: document.getElementById("maxWordsInput")
 };
 
-const STORAGE_KEY = "autofill_dataset";
 const dataApi = window.__autofillData || {};
 
 const DEFAULT_DATASETS = {
@@ -98,16 +96,7 @@ function readDatasetsFromStorage() {
     });
   }
 
-  return new Promise((resolve) => {
-    chrome.storage.sync.get(STORAGE_KEY, (result) => {
-      const stored = result && result[STORAGE_KEY] ? result[STORAGE_KEY] : null;
-      if (!stored || typeof stored !== "object" || !stored.datasets) {
-        resolve(DEFAULT_DATASETS);
-        return;
-      }
-      resolve(stored.datasets);
-    });
-  });
+  return Promise.resolve(DEFAULT_DATASETS);
 }
 
 function writeDatasetsToStorage(datasets) {
@@ -115,21 +104,17 @@ function writeDatasetsToStorage(datasets) {
     return dataApi.saveUserConfig(datasets);
   }
 
-  return new Promise((resolve) => {
-    const payload = {
-      version: 1,
-      datasets
-    };
-
-    chrome.storage.sync.set({ [STORAGE_KEY]: payload }, () => {
-      resolve(!chrome.runtime.lastError);
-    });
-  });
+  return Promise.resolve(false);
 }
 
 async function loadDatasetEditor() {
-  const datasets = await readDatasetsFromStorage();
-  setFormValues({ ...DEFAULT_DATASETS, ...datasets });
+  try {
+    const datasets = await readDatasetsFromStorage();
+    setFormValues({ ...DEFAULT_DATASETS, ...datasets });
+    setStatus("Ready");
+  } catch (_error) {
+    setStatus("Failed to load dataset.");
+  }
 }
 
 async function saveDatasetEditor() {
@@ -157,33 +142,6 @@ async function restoreDefaults() {
   setStatus("Default dataset restored.");
 }
 
-async function sendAutofillMessage() {
-  setStatus("Scanning fields...");
-  runButton.disabled = true;
-
-  try {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    if (!tab?.id) {
-      setStatus("No active tab found.");
-      return;
-    }
-
-    const response = await chrome.tabs.sendMessage(tab.id, { type: "RUN_AUTOFILL" });
-    if (!response?.ok) {
-      setStatus(`Error: ${response?.error || "Autofill failed"}`);
-      return;
-    }
-
-    const { scanned, eligible, filled } = response.result;
-    setStatus(`Done. scanned=${scanned}, eligible=${eligible}, filled=${filled}`);
-  } catch (_error) {
-    setStatus("Unable to run on this page. Reload tab if needed.");
-  } finally {
-    runButton.disabled = false;
-  }
-}
-
-runButton.addEventListener("click", sendAutofillMessage);
 saveButton.addEventListener("click", saveDatasetEditor);
 restoreButton.addEventListener("click", restoreDefaults);
 

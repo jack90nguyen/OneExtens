@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Visible Autofill</title>
+    <title>Visible Autofill Options</title>
     <style>
       :root {
         --bg: #f5f7fa;
@@ -17,90 +17,43 @@
 
       body {
         margin: 0;
-        width: 320px;
-        min-height: 190px;
         font-family: "Trebuchet MS", "Segoe UI", sans-serif;
         color: var(--text);
         background: radial-gradient(circle at 20% 0%, #ffffff 0%, var(--bg) 65%);
       }
 
+      .page {
+        max-width: 780px;
+        margin: 0 auto;
+        padding: 24px 16px 40px;
+      }
+
       .card {
-        padding: 14px;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 16px;
       }
 
       h1 {
         margin: 0 0 6px;
-        font-size: 18px;
-        letter-spacing: 0.2px;
+        font-size: 24px;
       }
 
       p {
-        margin: 0 0 12px;
+        margin: 0 0 16px;
         color: var(--muted);
-        font-size: 13px;
-        line-height: 1.35;
-      }
-
-      button {
-        width: 100%;
-        border: 1px solid transparent;
-        border-radius: 10px;
-        padding: 10px 12px;
-        font-size: 14px;
-        font-weight: 700;
-        color: #ffffff;
-        background: linear-gradient(180deg, var(--accent), #0a6464);
-        cursor: pointer;
-      }
-
-      button:hover {
-        background: linear-gradient(180deg, var(--accent-hover), #084b4b);
-      }
-
-      button:disabled {
-        cursor: wait;
-        opacity: 0.7;
-      }
-
-      .status {
-        margin-top: 10px;
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        background: var(--panel);
-        padding: 8px 10px;
-        min-height: 18px;
-        font-size: 12px;
-        color: var(--muted);
-      }
-
-      .shortcut {
-        margin-top: 8px;
-        font-size: 11px;
-        color: var(--muted);
-      }
-
-      .section {
-        margin-top: 12px;
-        border-top: 1px dashed var(--border);
-        padding-top: 10px;
-      }
-
-      .section h2 {
-        margin: 0 0 8px;
-        font-size: 12px;
-        color: #1f2f43;
-        text-transform: uppercase;
-        letter-spacing: 0.4px;
+        line-height: 1.45;
       }
 
       .row {
-        margin-bottom: 8px;
+        margin-bottom: 10px;
       }
 
-      .row label {
+      label {
         display: block;
-        margin-bottom: 4px;
-        font-size: 11px;
+        margin-bottom: 6px;
+        font-size: 13px;
         color: #2f3f54;
       }
 
@@ -112,27 +65,36 @@
         border-radius: 8px;
         background: #fff;
         color: var(--text);
-        font-size: 12px;
-        padding: 7px 8px;
+        font-size: 13px;
+        padding: 8px 10px;
         font-family: "Trebuchet MS", "Segoe UI", sans-serif;
       }
 
       textarea {
         resize: vertical;
-        min-height: 58px;
+        min-height: 70px;
       }
 
       .actions {
         display: flex;
-        gap: 8px;
-        margin-top: 6px;
+        gap: 10px;
+        margin-top: 8px;
       }
 
-      .actions button {
+      button {
         width: auto;
-        flex: 1;
-        font-size: 12px;
-        padding: 8px 9px;
+        border: 1px solid transparent;
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-size: 14px;
+        font-weight: 700;
+        color: #ffffff;
+        background: linear-gradient(180deg, var(--accent), #0a6464);
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: linear-gradient(180deg, var(--accent-hover), #084b4b);
       }
 
       .ghost {
@@ -145,27 +107,26 @@
         background: #f0f4f8;
       }
 
-      kbd {
+      .status {
+        margin-top: 12px;
         border: 1px solid var(--border);
-        border-bottom-width: 2px;
-        border-radius: 5px;
-        padding: 1px 4px;
-        background: #ffffff;
-        font-family: inherit;
-        font-size: 11px;
+        border-radius: 8px;
+        background: var(--panel);
+        padding: 10px 12px;
+        min-height: 20px;
+        font-size: 13px;
+        color: var(--muted);
       }
     </style>
   </head>
   <body>
-    <main class="card">
-      <h1>Visible Form Autofill</h1>
-      <p>Fills only visible, in-viewport, interactable fields.</p>
-      <button id="runAutofill" type="button">Autofill Active Page</button>
-      <div class="status" id="status" role="status" aria-live="polite">Ready</div>
-      <div class="shortcut">Shortcut: <kbd>Alt</kbd> + <kbd>F</kbd></div>
-
-      <section class="section">
-        <h2>Dataset Editor</h2>
+    <main class="page">
+      <section class="card">
+        <h1>Visible Autofill Options</h1>
+        <p>
+          Configure dataset values used during autofill. Open this page from extension menu:
+          right click icon -> Options.
+        </p>
 
         <div class="row">
           <label for="namesInput">Names (one per line)</label>
@@ -216,9 +177,11 @@
           <button id="saveDataset" type="button">Save Dataset</button>
           <button id="restoreDefaults" type="button" class="ghost">Restore Defaults</button>
         </div>
+
+        <div class="status" id="status" role="status" aria-live="polite">Ready</div>
       </section>
     </main>
     <script src="../data/dataset-manager.js"></script>
-    <script src="popup.js"></script>
+    <script src="options.js"></script>
   </body>
 </html>
