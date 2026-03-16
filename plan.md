@@ -1,35 +1,35 @@
 # Plan: Autofill Extension - One-Click Runtime + Options Config
 
-## Objective / Muc tieu
+## Objective / Mục tiêu
 
-Xay dung va duy tri Chrome Extension (Manifest V3) co luong su dung toi uu:
+Xây dựng và duy trì Chrome Extension (Manifest V3) có luồng sử dụng tối ưu:
 
-- Click icon extension de autofill ngay tren tab hien tai.
-- Dung `Alt + Shift + F` de trigger nhanh bang ban phim.
-- Cau hinh dataset thong qua trang **Options** (menu right click icon -> Options).
-- Chi thong bao khi co loi; thanh cong thi chay im lang.
+- Click icon extension để autofill ngay trên tab hiện tại.
+- Dùng `Alt + Shift + F` để trigger nhanh bằng bàn phím.
+- Cấu hình dataset thông qua trang **Options** (menu right click icon -> Options).
+- Chỉ thông báo khi có lỗi; thành công thì chạy im lặng.
 
-## Constraints / Rang buoc
+## Constraints / Ràng buộc
 
-- Khong thay doi hoac them moi database/model ben ngoai extension.
-- Chi luu user dataset trong `chrome.storage.sync`.
-- Khong autofill field hidden, bi che, hoac nam ngoai viewport.
-- Khong them telemetry/tracking/network call cho autofill logic.
+- Không thay đổi hoặc thêm mới database/model bên ngoài extension.
+- Chỉ lưu user dataset trong `chrome.storage.sync`.
+- Không autofill field hidden, bị che, hoặc nằm ngoài viewport.
+- Không thêm telemetry/tracking/network call cho autofill logic.
 
 ## Current UX Flow
 
 1. **Trigger autofill**
-   - User click icon extension, hoac nhan `Alt + Shift + F`.
+   - User click icon extension, hoặc nhấn `Alt + Shift + F`.
 2. **Background action click**
-   - `background/service-worker.js` gui message `RUN_AUTOFILL` den content script.
+   - `background/service-worker.js` gửi message `RUN_AUTOFILL` đến content script.
 3. **Runtime autofill pipeline**
    - `content/autofill.js` scan + filter + detect + random + apply + dispatch events.
 4. **Error handling**
-   - Neu that bai, service worker inject `alert()` de thong bao loi tren page.
+   - Nếu thất bại, service worker inject `alert()` để thông báo lỗi trên page.
 5. **Options dataset config**
-   - User vao `Options` de load/save/restore dataset.
+   - User vào `Options` để load/save/restore dataset.
 
-## Runtime Workflow / Quy trinh chi tiet
+## Runtime Workflow / Quy trình chi tiết
 
 1. **Scan fields**
    - Query selector: `input, textarea, select`.
@@ -38,36 +38,36 @@ Xay dung va duy tri Chrome Extension (Manifest V3) co luong su dung toi uu:
    - `isInteractable`
    - `isInViewport`
 3. **Modal priority**
-   - Neu ton tai dialog/modal hop le, uu tien fill field ben trong modal.
+   - Nếu tồn tại dialog/modal hợp lệ, ưu tiên fill field bên trong modal.
 4. **Field type detection**
-   - Dua tren `input.type` + heuristic (`name/id/placeholder/aria-label/autocomplete`).
+   - Dựa trên `input.type` + heuristic (`name/id/placeholder/aria-label/autocomplete`).
 5. **Dataset resolution**
-   - Merge thu tu: user config -> defaults -> fallback.
+   - Merge thứ tự: user config -> defaults -> fallback.
 6. **Random value generation**
-   - Ho tro text/email/company/address/phone/url/password/paragraph/date/number/search/checkbox/radio/select.
+   - Hỗ trợ text/email/company/address/phone/url/password/paragraph/date/number/search/checkbox/radio/select.
 7. **Apply + event dispatch**
    - Set value/checked/selectedIndex.
-   - Dispatch `input` va `change` de tuong thich SPA frameworks.
+   - Dispatch `input` và `change` để tương thích SPA frameworks.
 
 ## Modules and Responsibilities
 
 ### `background/service-worker.js`
 
-- Lang nghe `chrome.action.onClicked`.
-- Gui `RUN_AUTOFILL` den active tab.
-- Khi loi: show `alert()` bang `chrome.scripting.executeScript`.
-- Khi thanh cong: khong hien thi thong bao.
+- Lắng nghe `chrome.action.onClicked`.
+- Gửi `RUN_AUTOFILL` đến active tab.
+- Khi lỗi: show `alert()` bằng `chrome.scripting.executeScript`.
+- Khi thành công: không hiển thị thông báo.
 
 ### `content/content-script.js`
 
-- Nhan message `RUN_AUTOFILL` va goi `runAutofill()`.
-- Tra response `{ ok: true, result }` hoac `{ ok: false, error }`.
-- Ho tro keyboard shortcut `Alt + Shift + F`.
+- Nhận message `RUN_AUTOFILL` và gọi `runAutofill()`.
+- Trả response `{ ok: true, result }` hoặc `{ ok: false, error }`.
+- Hỗ trợ keyboard shortcut `Alt + Shift + F`.
 
 ### `content/autofill.js`
 
-- Ham entry: `runAutofill()`.
-- Xu ly full autofill pipeline va tra ket qua:
+- Hàm entry: `runAutofill()`.
+- Xử lý full autofill pipeline và trả kết quả:
 
 ```js
 {
@@ -79,17 +79,17 @@ Xay dung va duy tri Chrome Extension (Manifest V3) co luong su dung toi uu:
 
 ### `data/dataset-manager.js`
 
-- API chinh:
+- API chính:
   - `getEffectiveDatasets()`
   - `saveUserConfig(datasets)`
   - `restoreDefaultConfig()`
-- Normalize input va merge defaults/fallback.
+- Normalize input và merge defaults/fallback.
 
 ### `data/random-generator.js`
 
 - Utility random: `randomInt`, `randomItem`, `randomBoolean`, `shuffle`.
 - Sinh paragraph theo `minWords/maxWords`.
-- Generate value theo semantic type + session cache (giam trung lap).
+- Generate value theo semantic type + session cache (giảm trùng lặp).
 
 ### `data/field-detector.js`
 
@@ -97,12 +97,12 @@ Xay dung va duy tri Chrome Extension (Manifest V3) co luong su dung toi uu:
 
 ### `options/options.html` + `options/options.js`
 
-- UI chinh sua dataset.
+- UI chỉnh sửa dataset.
 - Action:
-  - load data khi mo trang
+  - load data khi mở trang
   - save dataset
   - restore defaults
-- Hien status tren options page cho thao tac save/restore/load.
+- Hiện status trên options page cho thao tác save/restore/load.
 
 ## Data Contract / Dataset Shape
 
@@ -123,22 +123,22 @@ Xay dung va duy tri Chrome Extension (Manifest V3) co luong su dung toi uu:
 
 ## Error Handling Policy
 
-- Khong de uncaught error thoat khoi message handler.
-- Content script response phai theo format `{ ok, error? }`.
-- Service worker thong bao loi bang `alert()` tren tab hien tai.
-- Options page phai cap nhat status khi load/save/restore that bai.
+- Không để uncaught error thoát khỏi message handler.
+- Content script response phải theo format `{ ok, error? }`.
+- Service worker thông báo lỗi bằng `alert()` trên tab hiện tại.
+- Options page phải cập nhật status khi load/save/restore thất bại.
 
 ## Validation Checklist
 
-1. Mo `chrome://extensions`, reload extension.
-2. Mo trang co form va click icon extension -> form duoc fill.
-3. Thu keyboard shortcut `Alt + Shift + F`.
-4. Thu tren trang khong ho tro inject script (`chrome://...`) -> co alert loi.
-5. Right click icon -> Options, sua dataset, Save.
-6. Chay autofill lai va xac nhan du lieu moi duoc su dung.
-7. Thu Restore Defaults va xac nhan reset thanh cong.
-8. Kiem tra hidden/covered/out-of-viewport fields van bi bo qua.
-9. Kiem tra modal-priority van dung.
+1. Mở `chrome://extensions`, reload extension.
+2. Mở trang có form và click icon extension -> form được fill.
+3. Thử keyboard shortcut `Alt + Shift + F`.
+4. Thử trên trang không hỗ trợ inject script (`chrome://...`) -> có alert lỗi.
+5. Right click icon -> Options, sửa dataset, Save.
+6. Chạy autofill lại và xác nhận dữ liệu mới được sử dụng.
+7. Thử Restore Defaults và xác nhận reset thành công.
+8. Kiểm tra hidden/covered/out-of-viewport fields vẫn bị bỏ qua.
+9. Kiểm tra modal-priority vẫn đúng.
 
 ## Related Files
 
@@ -158,6 +158,6 @@ Xay dung va duy tri Chrome Extension (Manifest V3) co luong su dung toi uu:
 
 ## Next Improvements (Optional)
 
-- Bo sung test harness (unit tests cho detector/random/dataset manager).
-- Bo sung validation chi tiet hon trong options form (field-level errors).
-- Can nhac i18n labels cho options UI neu mo rong doi tuong su dung.
+- Bổ sung test harness (unit tests cho detector/random/dataset manager).
+- Bổ sung validation chi tiết hơn trong options form (field-level errors).
+- Cân nhắc i18n labels cho options UI nếu mở rộng đối tượng sử dụng.
