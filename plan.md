@@ -11,7 +11,6 @@ Xây dựng và duy trì Chrome Extension (Manifest V3) có luồng sử dụng 
 
 ## Constraints / Ràng buộc
 
-- Không thay đổi hoặc thêm mới database/model bên ngoài extension.
 - Chỉ lưu user dataset trong `chrome.storage.sync`.
 - Không autofill field hidden, bị che, hoặc nằm ngoài viewport.
 - Không thêm telemetry/tracking/network call cho autofill logic.
@@ -142,19 +141,19 @@ Xây dựng và duy trì Chrome Extension (Manifest V3) có luồng sử dụng 
 
 ## Related Files
 
-- `manifest.json`
-- `background/service-worker.js`
-- `content/content-script.js`
-- `content/autofill.js`
-- `data/dataset-manager.js`
-- `data/random-generator.js`
-- `data/field-detector.js`
-- `utils/visibility.js`
-- `utils/interactable.js`
-- `utils/viewport.js`
-- `options/options.html`
-- `options/options.js`
-- `README.md`
+- `manifest.json`: Cấu hình extension (name/action/options/background/content scripts) và thứ tự inject scripts.
+- `background/service-worker.js`: Xử lý click icon extension, gửi `RUN_AUTOFILL`, và hiển thị `alert()` khi có lỗi.
+- `content/content-script.js`: Nhận message runtime, gọi `runAutofill()`, và xử lý shortcut `Alt + Shift + F`.
+- `content/autofill.js`: Pipeline autofill chính (scan, filter, modal-priority, detect type, fill value, dispatch events).
+- `data/dataset-manager.js`: Quản lý dữ liệu dataset trong `chrome.storage.sync` (normalize, merge defaults/fallback, save/load/restore).
+- `data/random-generator.js`: Sinh dữ liệu random theo từng loại field và áp dụng session cache để giảm trùng lặp.
+- `data/field-detector.js`: Detect semantic field type dựa trên `input.type` và heuristic từ attributes.
+- `utils/visibility.js`: Kiểm tra phần tử có hiển thị hợp lệ theo CSS/layout.
+- `utils/interactable.js`: Kiểm tra phần tử có thể tương tác (không disabled, không bị phần tử khác che tại tâm).
+- `utils/viewport.js`: Kiểm tra phần tử nằm trong viewport hiện tại.
+- `options/options.html`: Giao diện trang Options để chỉnh sửa dataset (bao gồm default password).
+- `options/options.js`: Logic load/save/restore dataset và cập nhật trạng thái thao tác trên Options page.
+- `README.md`: Tài liệu hướng dẫn cài đặt, cách dùng và behavior hiện tại cho người dùng.
 
 ## Next Improvements (Optional)
 
