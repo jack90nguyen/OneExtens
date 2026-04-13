@@ -26,22 +26,27 @@ function getErrorMessage(error, fallback) {
   return fallback;
 }
 
-chrome.action.onClicked.addListener((tab) => {
-  const tabId = tab && tab.id;
-  if (!tabId) {
-    return;
-  }
-
-  chrome.tabs
-    .sendMessage(tabId, { type: "RUN_AUTOFILL" })
-    .then((response) => {
-      if (!response || !response.ok) {
-        const message = getErrorMessage(response && response.error, "Autofill failed on this page.");
-        showTabAlert(tabId, message);
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type === "TRIGGER_AUTOFILL") {
+    chrome.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
+      const tab = tabs[0];
+      const tabId = tab && tab.id;
+      if (!tabId) {
+        return;
       }
-    })
-    .catch((error) => {
-      const message = getErrorMessage(error, "Cannot run autofill on this page.");
-      showTabAlert(tabId, message);
+
+      chrome.tabs
+        .sendMessage(tabId, { type: "RUN_AUTOFILL" })
+        .then((response) => {
+          if (!response || !response.ok) {
+            const errorMessage = getErrorMessage(response && response.error, "Autofill failed on this page.");
+            showTabAlert(tabId, errorMessage);
+          }
+        })
+        .catch((error) => {
+          const errorMessage = getErrorMessage(error, "Cannot run autofill on this page.");
+          showTabAlert(tabId, errorMessage);
+        });
     });
+  }
 });

@@ -92,7 +92,7 @@ autofill-extension/
 ## Usage
 
 - Open any page with forms.
-- Click the extension icon to run autofill on the active page.
+- Click the extension icon to open the menu, then click **Auto Fill Form**.
 - Or press `Alt + Shift + F` while the page is focused.
 - To customize dataset values, right click extension icon -> **Options**.
 - Autofill success has no popup/status message; only errors are alerted.
@@ -127,3 +127,4 @@ Expected:
 
 - The extension intentionally avoids autofilling non-interactable elements.
 - It does not require build tooling or extra configuration.
+ration.
