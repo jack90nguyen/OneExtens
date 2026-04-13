@@ -1,4 +1,4 @@
-# OneFill (Chrome Extension)
+# OneExtens (Chrome Extension)
 
 Chrome Extension (Manifest V3) that autofills only form fields that are currently visible, interactable, and fully inside the viewport.
 
