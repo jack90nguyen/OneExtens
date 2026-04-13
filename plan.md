@@ -18,9 +18,9 @@ Xây dựng và duy trì Chrome Extension (Manifest V3) có luồng sử dụng 
 ## Current UX Flow
 
 1. **Trigger autofill**
-   - User click icon extension, hoặc nhấn `Alt + Shift + F`.
-2. **Background action click**
-   - `background/service-worker.js` gửi message `RUN_AUTOFILL` đến content script.
+   - User click icon extension để mở popup menu, chọn "Auto Fill Form" hoặc nhấn `Alt + Shift + F`.
+2. **Background message**
+   - Popup script gửi `TRIGGER_AUTOFILL` đến `background/service-worker.js`, background sẽ gửi message `RUN_AUTOFILL` đến content script.
 3. **Runtime autofill pipeline**
    - `content/autofill.js` scan + filter + detect + random + apply + dispatch events.
 4. **Error handling**
