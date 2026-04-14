@@ -37,3 +37,17 @@ body {
 .menu-item .icon {
   font-size: 16px;
 }
+
+.footer {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #eee;
+  font-size: 11px;
+  color: #888;
+  text-align: center;
+}
+
+.footer strong {
+  color: #555;
+  font-weight: 600;
+}

@@ -17,3 +17,6 @@ Expected output:
 
 Trong popup.html, thêm một mục "Setting"
 Khi click vào thì mở ra trang options.html của Extention
+
+Trong popup.html, bổ sung thêm một footer ghi nôi dung là:
+Developed by: jack90nguyen
