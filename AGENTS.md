@@ -1,168 +1,72 @@
 # AGENTS.md
 
-Guide for coding agents working in `ex-autofill`.
-Follow this document to keep changes consistent with project behavior.
+## 1. Scope
+- Act as coding agent for this codebase
+- Focus on small, precise, safe changes
+- Do NOT perform large refactors unless explicitly requested
 
-## Project Snapshot
+## 2. Router (Context Loading Rules)
+- Overview project: `README.md`
+- Code structure / file locating: `CODEBASE.md`
+- Project memory: `MEMORY.md`
+- Feature-specific tasks / plan: `*PLAN.md`
 
-- Type: Chrome Extension (Manifest V3), plain JavaScript.
-- Build system: none (direct source loading in browser).
-- Package manager: none (`package.json` is not present).
-- Runtime model: content scripts + background service worker + options page + globals on `window`.
-- Product objective: autofill only fields that are visible, interactable, and in viewport.
+👉 Load only what is necessary to minimize token usage.
+👉 MUST read `MEMORY.md` before implementation when task may relate to conventions, prior decisions, reusable patterns, or known pitfalls.
 
-## Rules Files Discovery
+## 3. Workflow
+1. Analyze request
+2. Load minimal context via Router
+3. Read `MEMORY.md` if relevant
+4. Propose plan if needed -> save `*PLAN.md`
+5. Implement changes
+6. Run build / type-check / lint / tests (when available)
+7. Fix detected issues
+8. Verify impact (no break, no overwrite)
+9. Update `MEMORY.md` with reusable insights (if any)
+10. Report completion only after successful verification
 
-Checked for additional agent instruction files:
+## 4. Coding Conventions
+- Prefer short, clear names
+- Files: concise and meaningful
+- Functions: short, verb-based
+- Follow existing patterns
+- Avoid over-engineering
+- Do NOT introduce new patterns unless required
 
-- `.cursorrules`: not found
-- `.cursor/rules/`: not found
-- `.github/copilot-instructions.md`: not found
+## 5. Data Model Rules
+- Do NOT use `any` (TS) or `dynamic` (C#), especially in return types
+- Services must return explicit models (DTO / ViewModel)
+- Create a model if none exists
+- Ensure strong typing and consistency
 
-If any are added later, treat them as higher-priority guidance and update this file.
+## 6. Safety Rules (Critical)
+- Before changes:
+  - Check for manual user edits
+  - Re-read relevant files
+- NEVER overwrite user changes without confirmation
+- Prefer minimal diff:
+  - Change only what is necessary
+  - Preserve existing logic
 
-## Repository Layout
+## 7. Memory Rules
+- MUST consult `MEMORY.md` before architectural or convention-related changes
+- MUST update `MEMORY.md` when discovering reusable project knowledge
+- Do NOT store temporary task details
+- Avoid duplicates; refine existing notes instead
+- Keep entries concise, specific, actionable
 
-- `manifest.json`: permissions and content-script injection order.
-- `content/autofill.js`: main autofill pipeline (`runAutofill`).
-- `content/content-script.js`: message listener and `Alt + Shift + F` trigger.
-- `data/dataset-manager.js`: storage I/O, normalization, defaults/fallback merge.
-- `data/random-generator.js`: randomized value generation and uniqueness cache.
-- `data/field-detector.js`: semantic field-type detection.
-- `utils/visibility.js`: CSS/layout visibility checks.
-- `utils/interactable.js`: disabled/covered checks.
-- `utils/viewport.js`: in-viewport checks.
-- `background/service-worker.js`: action click trigger and error alert fallback.
-- `options/options.js`: options actions, status text, dataset editor behavior.
-- `options/options.html`: options UI markup.
-- `README.md`: user-facing behavior and manual usage notes.
-
-## Build, Lint, Test Commands
-
-No formal toolchain is configured yet.
-
-### Build
-
-- Build command: not required.
-- Packaging command: not configured.
-
-### Lint / Format
-
-- Lint command: not configured.
-- Format command: not configured.
-
-### Tests
-
-- Automated test command: not configured.
-- Run full test suite: not available.
-- Run a single test: not available (no test harness is installed).
-
-### Manual Validation (Source of Truth)
-
-Use this flow after behavior changes:
-
-1. Open `chrome://extensions`.
-2. Enable Developer mode.
-3. Load unpacked extension from repo root.
-4. Open a page with forms.
-5. Trigger autofill via extension icon click or `Alt + Shift + F`.
-6. Confirm status includes `scanned`, `eligible`, `filled`.
-7. Confirm hidden/covered/out-of-viewport fields are skipped.
-8. Confirm modal-priority behavior when modal/dialog exists.
-
-### Useful Local Sanity Commands
-
-- Validate manifest JSON:
-  - `python3 -m json.tool manifest.json >/dev/null`
-- Inspect working tree:
-  - `git status`
-  - `git diff`
-
-## Architecture and Dependency Rules
-
-- `manifest.json` script order is significant; keep dependency order intact.
-- Shared APIs are exposed as globals; preserve these namespaces:
-  - `window.__autofillUtils`
-  - `window.__autofillData`
-  - `window.__autofillRandom`
-  - `window.__autofillDetector`
-  - `window.__autofillExtension`
-- Do not migrate runtime scripts to ESM/CJS imports unless architecture is redesigned.
-- Avoid bundler assumptions or build-step-only patterns.
-
-## Code Style Guidelines
-
-### Language / Module Model
-
-- Use modern plain JavaScript (no TypeScript).
-- Use IIFE module pattern for shared scripts.
-- Export public APIs explicitly to `window.__autofill*` only.
-
-### Imports / Dependencies
-
-- Runtime scripts use no `import`/`require`.
-- Cross-file dependencies must be expressed by manifest load order + global namespaces.
-- New shared file must be added to `manifest.json` in correct order.
-- Avoid introducing external runtime dependencies.
-
-### Formatting
-
-- Indentation: 2 spaces.
-- Semicolons: required.
-- Strings: prefer double quotes.
-- Equality: prefer strict (`===`, `!==`).
-- Trailing commas: keep existing style in multiline literals.
-- Prefer `const`; use `let` only when reassignment is required.
-- Prefer early returns to keep branches shallow.
-
-### Naming
-
-- Variables/functions: `camelCase`.
-- Constants: `UPPER_SNAKE_CASE` for config-like values.
-- Internal helpers: descriptive verbs (`normalizeDatasets`, `getTargetFields`).
-- Global API surface: namespaced under `window.__autofill*`.
-
-### Types and Data Shapes
-
-- Preserve object shapes across modules and options/runtime boundaries.
-- Dataset shape:
-  - `text`, `email`, `company`, `address`, `phone`, `url`: `string[]`
-  - `password`: `string`
-  - `paragraph`: `string`
-  - `minWords`, `maxWords`: `number`
-- Normalize unknown input before merge/use.
-- Keep storage API contracts stable (boolean success when expected).
-
-### Error Handling
-
-- Never allow uncaught errors to escape message handlers.
-- Wrap async boundaries in `try/catch` or Promise `.catch`.
-- In content-script responses, use `{ ok: false, error }` on failure.
-- Options actions must always update status text on success/failure.
-- Fail soft with defaults/fallbacks for malformed/missing data.
-
-### DOM and Autofill Behavior
-
-- Operate only on `input`, `textarea`, `select`.
-- Skip non-fillable fields (`hidden`, `file`, disabled, readonly where applicable).
-- Apply visibility + interactable + viewport filters before filling.
-- Keep modal-priority behavior unchanged when dialog selectors match.
-- Dispatch both `input` and `change` after mutating values.
-- Keep compatibility with SPA frameworks (React/Vue/Angular).
-
-### Security and Privacy
-
-- Do not add telemetry/tracking.
-- Do not add remote network calls for autofill logic.
-- Keep user dataset storage in `chrome.storage.sync` unless explicitly requested.
-- Treat page DOM/content as untrusted input.
-
-## Change Checklist
-
-Before finishing work:
-
-1. Ensure `manifest.json` load order remains valid.
-2. Ensure new globals are correctly namespaced.
-3. Ensure failure paths return graceful status/messages.
-4. Run manual validation on at least one normal form and one modal case.
-5. Update `README.md` when behavior or user workflow changes.
+## 8. Output Rules
+- Be concise
+- Show only relevant code changes
+- Avoid unnecessary explanations
+- State:
+  - What changed
+  - Why (brief)
+  - Build / check result
+  - Memory updated? (if applicable)
+- Never claim completion before checks pass
+- If checks fail:
+  - Do not mark task complete
+  - Show error summary
+  - Continue fixing if within scope
