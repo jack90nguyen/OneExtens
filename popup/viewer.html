@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>OneExtens Screenshot</title>
+  <link rel="icon" href="../icons/48.png">
+  <link rel="stylesheet" href="viewer.css">
+</head>
+<body>
+  <header class="bar">
+    <div class="meta">
+      <strong id="title">Full page screenshot</strong>
+      <span id="info"></span>
+    </div>
+    <button id="btn-download" class="primary" disabled>⬇ Download PNG</button>
+  </header>
+  <p id="warning" class="warning" hidden></p>
+  <main class="stage">
+    <img id="shot" alt="Full page screenshot" hidden>
+    <p id="empty" class="empty">Loading screenshot…</p>
+  </main>
+  <script src="viewer.js"></script>
+</body>
+</html>

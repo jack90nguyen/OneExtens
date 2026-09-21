@@ -1,10 +1,18 @@
 document.addEventListener('DOMContentLoaded', () => {
   const btnAutofill = document.getElementById('btn-autofill');
+  const btnCapture = document.getElementById('btn-capture');
   const btnSettings = document.getElementById('btn-settings');
 
   if (btnAutofill) {
     btnAutofill.addEventListener('click', () => {
       chrome.runtime.sendMessage({ type: "TRIGGER_AUTOFILL" });
+      window.close();
+    });
+  }
+
+  if (btnCapture) {
+    btnCapture.addEventListener('click', () => {
+      chrome.runtime.sendMessage({ type: "TRIGGER_CAPTURE" });
       window.close();
     });
   }

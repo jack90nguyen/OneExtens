@@ -1,6 +1,9 @@
 # OneExtens (Chrome Extension)
 
-Chrome Extension (Manifest V3) that autofills only form fields that are currently visible, interactable, and fully inside the viewport.
+Chrome Extension (Manifest V3) with two tools for frontend testing:
+
+- **Auto Fill Form** - autofills only form fields that are currently visible, interactable, and fully inside the viewport.
+- **Capture Full Page** - takes a full-page screenshot by scrolling and stitching the visible viewport captures.
 
 It is designed for frontend testing on real pages with overlays/modals, and avoids filling hidden or covered fields.
 
@@ -30,6 +33,23 @@ It is designed for frontend testing on real pages with overlays/modals, and avoi
   - `input[type=url]` from URL dataset
   - `input[type=tel]` natural/random phone formats
   - `input[type=number]` random in field min/max or default range `1..999`
+
+## Full Page Screenshot
+
+- Trigger: click the extension icon, then **Capture Full Page**.
+- The page is scrolled from top to bottom, each viewport is captured, and the slices are stitched into one PNG.
+- Elements with `position: fixed` or `position: sticky` are hidden after the first slice so headers/banners are not repeated down the image, then restored when the capture ends.
+- The original scroll position is restored after the capture.
+- The result opens in a new tab with a preview and a **Download PNG** button.
+- Uses only the already granted `activeTab` permission (no `debugger`, no `downloads`).
+
+Known limits:
+
+- Capturing is throttled to Chrome's 2 calls/second quota for `captureVisibleTab`, so a long page takes a few seconds and the page visibly scrolls while it runs.
+- Content inside an internal scroll container (not the page scroll) is only captured as far as it is visible.
+- Lazy-loaded media may not finish loading within the settle delay.
+- Very tall pages are clamped to the maximum canvas size; the viewer shows a warning when the bottom was cut off.
+- `chrome://` pages, the Chrome Web Store, and the PDF viewer cannot be captured.
 
 ## Autofill Rules
 
@@ -69,6 +89,7 @@ autofill-extension/
   content/
     content-script.js
     autofill.js
+    capture.js
   data/
     dataset-manager.js
     random-generator.js
@@ -80,6 +101,13 @@ autofill-extension/
   options/
     options.html
     options.js
+  popup/
+    popup.html
+    popup.js
+    popup.css
+    viewer.html
+    viewer.js
+    viewer.css
 ```
 
 ## Install (Load Unpacked)
@@ -93,6 +121,7 @@ autofill-extension/
 
 - Open any page with forms.
 - Click the extension icon to open the menu, then click **Auto Fill Form**.
+- To screenshot the whole page, open the menu and click **Capture Full Page**.
 - Or press `Alt + Shift + F` while the page is focused.
 - To customize dataset values, right click extension icon -> **Options**.
 - Autofill success has no popup/status message; only errors are alerted.
@@ -127,4 +156,3 @@ Expected:
 
 - The extension intentionally avoids autofilling non-interactable elements.
 - It does not require build tooling or extra configuration.
-ration.

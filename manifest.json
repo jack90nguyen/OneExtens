@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "OneExtens",
-  "version": "1.1.0",
-  "description": "Autofills only visible and interactable form fields for frontend testing.",
+  "version": "1.2.0",
+  "description": "Autofills only visible and interactable form fields, and captures full-page screenshots.",
   "icons": {
     "16": "icons/16.png",
     "32": "icons/32.png",
@@ -34,6 +34,7 @@
         "data/random-generator.js",
         "data/field-detector.js",
         "content/autofill.js",
+        "content/capture.js",
         "content/content-script.js"
       ],
       "run_at": "document_idle"

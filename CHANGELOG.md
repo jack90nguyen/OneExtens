@@ -1,6 +1,18 @@
 # CHANGELOG
 
-## 2026-03-16 (today)
+## 2026-09-21
+
+#### 1. Chụp ảnh full trang (Capture Full Page)
+- Thêm chức năng chụp toàn bộ trang web: cuộn trang theo từng viewport, chụp `captureVisibleTab` rồi ghép các lát lại thành một ảnh PNG duy nhất bằng `OffscreenCanvas` trong service worker.
+- Ẩn các element `position: fixed` / `sticky` từ lát thứ 2 trở đi để header/banner không bị lặp lại dọc ảnh, khôi phục nguyên trạng (kể cả vị trí scroll) sau khi chụp xong.
+- Ảnh kết quả mở ở tab mới (`popup/viewer.html`) kèm preview và nút **Download PNG**; cảnh báo khi trang quá dài bị cắt bớt do giới hạn canvas.
+- Không thêm permission mới: dùng lại `activeTab` + `scripting` sẵn có (không dùng `chrome.debugger`).
+- Thêm nút **Capture Full Page** vào popup menu.
+
+#### 2. Cập nhật bộ icon
+- Regen toàn bộ icon (16/32/48/128 + favicon 512) từ `logo.png`, crop bỏ vùng trong suốt và shadow thừa để logo chiếm tối đa khung hiển thị.
+
+## 2026-03-16
 
 #### 1. Khởi tạo chức năng Autofill theo hiển thị thực tế
 - Khởi tạo project Chrome Extension (Manifest V3) mang tên "OneExtens".
