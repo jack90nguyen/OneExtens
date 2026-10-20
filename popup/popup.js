@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   const btnAutofill = document.getElementById('btn-autofill');
   const btnCapture = document.getElementById('btn-capture');
+  const btnChecker = document.getElementById('btn-checker');
   const btnSettings = document.getElementById('btn-settings');
 
   if (btnAutofill) {
@@ -13,6 +14,13 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnCapture) {
     btnCapture.addEventListener('click', () => {
       chrome.runtime.sendMessage({ type: "TRIGGER_CAPTURE" });
+      window.close();
+    });
+  }
+
+  if (btnChecker) {
+    btnChecker.addEventListener('click', () => {
+      chrome.runtime.sendMessage({ type: "TRIGGER_CHECKER" });
       window.close();
     });
   }

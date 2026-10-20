@@ -206,6 +206,29 @@ function runAutofill() {
   });
 }
 
+function runCheckerboard() {
+  chrome.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
+    const tab = tabs[0];
+    const tabId = tab && tab.id;
+    if (!tabId) {
+      return;
+    }
+
+    chrome.tabs
+      .sendMessage(tabId, { type: "TOGGLE_CHECKER" })
+      .then((response) => {
+        if (!response || !response.ok) {
+          const errorMessage = getErrorMessage(response && response.error, "Checkerboard failed on this page.");
+          showTabAlert(tabId, errorMessage);
+        }
+      })
+      .catch((error) => {
+        const errorMessage = getErrorMessage(error, "Cannot toggle checkerboard on this page.");
+        showTabAlert(tabId, errorMessage);
+      });
+  });
+}
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === "TRIGGER_AUTOFILL") {
     runAutofill();
@@ -214,6 +237,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   if (message.type === "TRIGGER_CAPTURE") {
     runCapture();
+    return false;
+  }
+
+  if (message.type === "TRIGGER_CHECKER") {
+    runCheckerboard();
     return false;
   }
 

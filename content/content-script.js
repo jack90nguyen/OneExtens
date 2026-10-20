@@ -44,9 +44,28 @@ function handleCaptureRequest(message, sendResponse) {
   }
 }
 
+function handleCheckerRequest(sendResponse) {
+  const api = window.__autofillChecker;
+  if (!api) {
+    sendResponse({ ok: false, error: "Checkerboard runtime unavailable" });
+    return;
+  }
+
+  if (!api.isImageDocument()) {
+    sendResponse({ ok: false, error: "Checkerboard only works on a page showing a single image." });
+    return;
+  }
+
+  sendResponse({ ok: true, result: api.toggle() });
+}
+
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message?.type === "RUN_AUTOFILL") {
     handleAutofillRequest(sendResponse);
+    return true;
+  }
+  if (message?.type === "TOGGLE_CHECKER") {
+    handleCheckerRequest(sendResponse);
     return true;
   }
   if (message?.type && CAPTURE_ACTIONS[message.type]) {

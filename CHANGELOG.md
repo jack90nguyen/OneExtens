@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 2026-10-20
+
+#### 1. Nền caro cho ảnh PNG (Checkerboard)
+- Mở bất kỳ link ảnh nào là **tự động** có nền caro, không cần thao tác - để nhìn ra ngay vùng nào trong suốt. Thêm content script `content/alpha-checker.js` (`window.__autofillChecker`).
+- Nguyên nhân cần xử lý: Chrome image document tự gắn **inline style** `background-color: hsl(0, 0%, 90%)` lên thẻ `<img>` (dark mode) - stylesheet inject từ extension không đè được, nên phải set inline `!important` thẳng lên element.
+- Chrome ghi đè nguyên `style` attribute mỗi lần zoom ảnh -> dùng `MutationObserver` canh và vẽ lại. Observer được disconnect trong lúc vẽ: callback của nó chạy ở microtask nên cờ boolean sẽ bị reset trước khi callback nổ (đã dính bug này lúc test, đổi sang disconnect/reconnect mới đúng).
+- Giữ lại chuỗi style mà Chrome ghi gần nhất -> nút **Toggle Checkerboard** tắt đi là trả về đúng y nguyên.
+- Chỉ chạy khi `document.contentType` là `image/*`; trang khác thoát ngay.
+- Không thêm permission: tái dùng `content_scripts` trên `<all_urls>` sẵn có.
+
 ## 2026-09-21
 
 #### 1. Chụp ảnh full trang (Capture Full Page)

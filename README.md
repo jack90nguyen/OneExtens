@@ -4,6 +4,7 @@ Chrome Extension (Manifest V3) with two tools for frontend testing:
 
 - **Auto Fill Form** - autofills only form fields that are currently visible, interactable, and fully inside the viewport.
 - **Capture Full Page** - takes a full-page screenshot by scrolling and stitching the visible viewport captures.
+- **Checkerboard** - automatically paints a checkerboard behind any standalone image page so PNG transparency is visible.
 
 It is designed for frontend testing on real pages with overlays/modals, and avoids filling hidden or covered fields.
 
@@ -51,6 +52,18 @@ Known limits:
 - Very tall pages are clamped to the maximum canvas size; the viewer shows a warning when the bottom was cut off.
 - `chrome://` pages, the Chrome Web Store, and the PDF viewer cannot be captured.
 
+## Checkerboard (PNG Alpha)
+
+When Chrome opens an image URL directly it sets an inline `background-color` on the `<img>` element (light gray in dark mode), so a transparent PNG looks like it has a solid background.
+
+- Applied automatically: opening any `image/*` URL paints the checkerboard, no click needed.
+- Click the extension icon then **Toggle Checkerboard** to turn it off for the current page and see the image as Chrome renders it; click again to turn it back on.
+- The checkerboard is written as an inline `!important` background on the image, because Chrome's own inline style cannot be overridden from an injected stylesheet.
+- Chrome rewrites the whole `style` attribute when the image is zoomed, so a `MutationObserver` watches the attribute and repaints. The observer is disconnected while painting: its callbacks run as microtasks, so a boolean guard would already be cleared by the time they fire.
+- The last style Chrome wrote is kept, so turning the checkerboard off restores that exact attribute.
+- Runs for any `image/*` document, not just PNG (opaque formats simply cover the pattern).
+- The pattern is fixed at 24px in CSS pixels, so it does not scale when the image is zoomed.
+
 ## Autofill Rules
 
 | Field | Value |
@@ -90,6 +103,7 @@ autofill-extension/
     content-script.js
     autofill.js
     capture.js
+    alpha-checker.js
   data/
     dataset-manager.js
     random-generator.js
@@ -122,6 +136,7 @@ autofill-extension/
 - Open any page with forms.
 - Click the extension icon to open the menu, then click **Auto Fill Form**.
 - To screenshot the whole page, open the menu and click **Capture Full Page**.
+- Opening a PNG URL shows a checkerboard automatically; use **Toggle Checkerboard** to turn it off for that page.
 - Or press `Alt + Shift + F` while the page is focused.
 - To customize dataset values, right click extension icon -> **Options**.
 - Autofill success has no popup/status message; only errors are alerted.

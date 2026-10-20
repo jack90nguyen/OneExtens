@@ -35,6 +35,7 @@
         "data/field-detector.js",
         "content/autofill.js",
         "content/capture.js",
+        "content/alpha-checker.js",
         "content/content-script.js"
       ],
       "run_at": "document_idle"
