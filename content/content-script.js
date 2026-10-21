@@ -59,9 +59,29 @@ function handleCheckerRequest(sendResponse) {
   sendResponse({ ok: true, result: api.toggle() });
 }
 
+function handlePasswordRequest(sendResponse) {
+  const api = window.__autofillPassword;
+  if (!api) {
+    sendResponse({ ok: false, error: "Password runtime unavailable" });
+    return;
+  }
+
+  const result = api.toggle();
+  if (result.count === 0) {
+    sendResponse({ ok: false, error: "No password field found on this page." });
+    return;
+  }
+
+  sendResponse({ ok: true, result });
+}
+
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message?.type === "RUN_AUTOFILL") {
     handleAutofillRequest(sendResponse);
+    return true;
+  }
+  if (message?.type === "TOGGLE_PASSWORD") {
+    handlePasswordRequest(sendResponse);
     return true;
   }
   if (message?.type === "TOGGLE_CHECKER") {

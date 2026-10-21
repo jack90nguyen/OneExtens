@@ -5,6 +5,7 @@ Chrome Extension (Manifest V3) with two tools for frontend testing:
 - **Auto Fill Form** - autofills only form fields that are currently visible, interactable, and fully inside the viewport.
 - **Capture Full Page** - takes a full-page screenshot by scrolling and stitching the visible viewport captures.
 - **Checkerboard** - automatically paints a checkerboard behind any standalone image page so PNG transparency is visible.
+- **Toggle Password** - flips every password field on the page to plain text and back, so a typed password can be checked.
 
 It is designed for frontend testing on real pages with overlays/modals, and avoids filling hidden or covered fields.
 
@@ -64,6 +65,20 @@ When Chrome opens an image URL directly it sets an inline `background-color` on 
 - Runs for any `image/*` document, not just PNG (opaque formats simply cover the pattern).
 - The pattern is fixed at 24px in CSS pixels, so it does not scale when the image is zoomed.
 
+## Toggle Password
+
+- Trigger: click the extension icon, then **Toggle Password**.
+- First click switches every `input[type=password]` on the page to `type=text`; the next click switches the same fields back.
+- The typed value is preserved across both directions.
+- Fields removed from the DOM in between are skipped on the way back.
+- Pages with no password field get an alert instead.
+
+Known limits:
+
+- Only the top frame is handled, same as autofill: a login form inside an `<iframe>` is not reached.
+- Fields inside a shadow DOM are not found.
+- An SPA re-render can reset the field back to `password`; click again.
+
 ## Autofill Rules
 
 | Field | Value |
@@ -104,6 +119,7 @@ autofill-extension/
     autofill.js
     capture.js
     alpha-checker.js
+    password-toggle.js
   data/
     dataset-manager.js
     random-generator.js
@@ -137,6 +153,7 @@ autofill-extension/
 - Click the extension icon to open the menu, then click **Auto Fill Form**.
 - To screenshot the whole page, open the menu and click **Capture Full Page**.
 - Opening a PNG URL shows a checkerboard automatically; use **Toggle Checkerboard** to turn it off for that page.
+- To read a password you are typing, open the menu and click **Toggle Password**.
 - Or press `Alt + Shift + F` while the page is focused.
 - To customize dataset values, right click extension icon -> **Options**.
 - Autofill success has no popup/status message; only errors are alerted.

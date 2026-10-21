@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 2026-10-21
+
+#### 1. Hiện/ẩn mật khẩu trong form (Toggle Password)
+- Thêm nút **Toggle Password** trong popup: đổi toàn bộ `input[type=password]` trên trang sang `type=text` để đọc được chữ đang gõ, bấm lần nữa trả về `password`. Thay cho thao tác mở DevTools sửa tay.
+- Thêm content script `content/password-toggle.js` (`window.__autofillPassword`), đi theo đúng pattern của autofill / capture / checkerboard.
+- Giá trị đã gõ được giữ nguyên qua cả 2 chiều; field đã bị gỡ khỏi DOM thì bỏ qua lúc trả về.
+- Trang không có field password nào thì alert báo.
+- Không thêm permission: tái dùng `content_scripts` trên `<all_urls>` sẵn có.
+- Giới hạn đã biết: chỉ chạy ở frame gốc (form trong `<iframe>` không ăn), không xuyên Shadow DOM.
+
 ## 2026-10-20
 
 #### 1. Nền caro cho ảnh PNG (Checkerboard)

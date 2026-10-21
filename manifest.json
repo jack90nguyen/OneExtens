@@ -36,6 +36,7 @@
         "content/autofill.js",
         "content/capture.js",
         "content/alpha-checker.js",
+        "content/password-toggle.js",
         "content/content-script.js"
       ],
       "run_at": "document_idle"
