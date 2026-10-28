@@ -10,7 +10,7 @@
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 13px;
   line-height: 1.55;
-  padding: 12px 16px;
+  padding: 28px 16px 16px;
   white-space: pre-wrap;
   word-break: break-word;
 }
