@@ -6,6 +6,7 @@ Chrome Extension (Manifest V3) with two tools for frontend testing:
 - **Capture Full Page** - takes a full-page screenshot by scrolling and stitching the visible viewport captures.
 - **Checkerboard** - automatically paints a checkerboard behind any standalone image page so PNG transparency is visible.
 - **Toggle Password** - flips every password field on the page to plain text and back, so a typed password can be checked.
+- **JSON View** - automatically renders a JSON response as a collapsible, colour-coded tree.
 
 It is designed for frontend testing on real pages with overlays/modals, and avoids filling hidden or covered fields.
 
@@ -65,6 +66,24 @@ When Chrome opens an image URL directly it sets an inline `background-color` on 
 - Runs for any `image/*` document, not just PNG (opaque formats simply cover the pattern).
 - The pattern is fixed at 24px in CSS pixels, so it does not scale when the image is zoomed.
 
+## JSON View
+
+Chrome serves a `.json` URL as a single unwrapped line inside a `<pre>`, which is unreadable for anything larger than a few keys.
+
+- Applied automatically: opening a document whose `contentType` contains `json` renders a tree, no click needed. A `text/plain` response is also handled when the URL path ends in `.json`.
+- Built from native `<details>` / `<summary>`, so expand and collapse come from the browser instead of custom click handling.
+- A collapsed node shows its item count, e.g. `"variants": [ … ], // 12 items`.
+- Colours follow `prefers-color-scheme`, with a separate light and dark palette. Every token clears WCAG AA against the page canvas; most clear AAA.
+- A string value starting with `http://` or `https://` is rendered as a link that opens in a new tab. The scheme is checked explicitly, so nothing like `javascript:` can reach an `href`. The surrounding quotes stay outside the anchor.
+- The original `<pre>` is hidden rather than removed; **Toggle JSON View** in the popup swaps back to it and back again.
+- Unparseable input is left alone silently, so a non-JSON page served with a JSON content type still renders normally.
+- Documents over 2 MB are skipped to avoid freezing the tab on a huge response.
+
+Known limits:
+
+- `Ctrl+F` does not match text inside a collapsed node; this applies to any tree-style JSON viewer.
+- Chrome draws its own **Pretty-print** checkbox above JSON documents. It is browser UI, not page DOM, so it stays visible and does nothing while the tree is shown.
+
 ## Toggle Password
 
 - Trigger: click the extension icon, then **Toggle Password**.
@@ -120,6 +139,7 @@ autofill-extension/
     capture.js
     alpha-checker.js
     password-toggle.js
+    json-viewer.js
   data/
     dataset-manager.js
     random-generator.js
@@ -154,6 +174,7 @@ autofill-extension/
 - To screenshot the whole page, open the menu and click **Capture Full Page**.
 - Opening a PNG URL shows a checkerboard automatically; use **Toggle Checkerboard** to turn it off for that page.
 - To read a password you are typing, open the menu and click **Toggle Password**.
+- Opening a `.json` URL shows a collapsible tree automatically; use **Toggle JSON View** to go back to the raw text.
 - Or press `Alt + Shift + F` while the page is focused.
 - To customize dataset values, right click extension icon -> **Options**.
 - Autofill success has no popup/status message; only errors are alerted.

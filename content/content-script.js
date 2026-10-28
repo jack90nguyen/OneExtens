@@ -75,9 +75,34 @@ function handlePasswordRequest(sendResponse) {
   sendResponse({ ok: true, result });
 }
 
+function handleJsonRequest(sendResponse) {
+  const api = window.__autofillJson;
+  if (!api) {
+    sendResponse({ ok: false, error: "JSON runtime unavailable" });
+    return;
+  }
+
+  if (!api.isJsonDocument()) {
+    sendResponse({ ok: false, error: "This page is not a JSON document." });
+    return;
+  }
+
+  const result = api.toggle();
+  if (!result.ok) {
+    sendResponse({ ok: false, error: "Could not render this JSON (unparseable or too large)." });
+    return;
+  }
+
+  sendResponse({ ok: true, result });
+}
+
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message?.type === "RUN_AUTOFILL") {
     handleAutofillRequest(sendResponse);
+    return true;
+  }
+  if (message?.type === "TOGGLE_JSON") {
+    handleJsonRequest(sendResponse);
     return true;
   }
   if (message?.type === "TOGGLE_PASSWORD") {

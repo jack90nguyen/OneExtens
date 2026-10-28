@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## 2026-10-28
+
+#### 1. Tự động format link JSON (JSON View)
+- Mở bất kỳ link `.json` nào là **tự động** render thành cây gập/mở được, tô màu theo kiểu dữ liệu - thay cho một cục chữ 1 dòng mà Chrome trả về. Thêm content script `content/json-viewer.js` (`window.__autofillJson`).
+- Dựng cây bằng `<details>` / `<summary>` native nên không phải tự viết logic click; nhánh gập lại hiện số phần tử, ví dụ `"variants": [ … ], // 12 items`.
+- Bảng màu có 2 biến thể sáng / tối theo `prefers-color-scheme`.
+- Giữ lại `<pre>` gốc (chỉ `display: none`) - nút **Toggle JSON View** trong popup đổi qua lại giữa cây và text thô.
+- JSON hỏng hoặc file trên 2MB thì bỏ qua, không đụng vào trang.
+- Không thêm permission: tái dùng `content_scripts` trên `<all_urls>` sẵn có.
+- Mục đích: thay thế extension JSON formatter bên thứ ba đang dùng.
+
+#### 2. JSON View - tăng tương phản và link bấm được
+- Đổi bảng màu sang tông tương phản cao (nền tối: 6.04 - 12.04, nền sáng: 4.55 - 15.8 theo WCAG). Riêng dấu câu `{ } [ ] : ,` kéo từ xám mờ lên gần trắng - đây là thứ chiếm nhiều diện tích nhất nên ảnh hưởng cảm giác "nhợt" rõ nhất.
+- Đổi màu `number` từ xanh sang cam để không lẫn với `key`.
+- String bắt đầu bằng `http://` / `https://` thành thẻ `<a>` mở tab mới (`target="_blank"`, `rel="noopener noreferrer"`). Chặn cứng theo scheme vì nội dung JSON là dữ liệu không tin được - không cho `javascript:` lọt vào `href`. Hai dấu nháy nằm ngoài thẻ `<a>` để cú pháp JSON vẫn đọc đúng.
+
 ## 2026-10-21
 
 #### 1. Hiện/ẩn mật khẩu trong form (Toggle Password)
