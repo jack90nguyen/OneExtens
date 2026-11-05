@@ -2,6 +2,21 @@
 
 ## 2026-11-05
 
+#### 2. Markdown viewer + hover preview ảnh
+
+**Markdown viewer** (`content/markdown-viewer.js`)
+- Mở file `.md` là tự render thành HTML đọc được, áp dụng cho cả URL web lẫn `file://`. Nhận diện qua `contentType` là `text/markdown`, hoặc `text/plain` mà path kết thúc `.md` / `.markdown` - cùng pattern với JSON viewer.
+- Tự viết parser gọn thay vì nhúng thư viện ngoài, giữ nguyên nếp zero-dependency không build step của repo. Cover: heading, đậm / nghiêng / gạch ngang, code inline, code fence, link, ảnh, URL trần, list có 1 cấp lồng, blockquote, hr, table.
+- Markdown là dữ liệu không tin được nên escape HTML trước khi sinh thẻ, và chặn scheme lạ trong `href` / `src` - chỉ cho `http`, `https`, `mailto`, `file`. HTML thô trong file hiện ra dạng text chứ không được parse.
+- Nút **Toggle Markdown View** đổi qua lại giữa bản render và text thô.
+- Giới hạn: không hỗ trợ reference link `[text][ref]`, footnote, list lồng sâu, HTML thô. `file://` cần bật thủ công **Allow access to file URLs** trong `chrome://extensions`.
+
+**Hover preview ảnh** (`content/link-preview.js`)
+- Rê chuột vào thẻ `<a>` có href đuôi ảnh thì hiện tooltip xem trước, cho phép query string phía sau đuôi. Luôn bật, không có nút tắt.
+- Một listener `mouseover` duy nhất ở `document` thay vì gắn vào từng thẻ. Chờ 250ms mới hiện để không nhấp nháy khi quét chuột qua danh sách link.
+- Ảnh đặt trên **nền caro** để thấy vùng trong suốt của PNG, dùng lại pattern của chức năng Checkerboard.
+- Tooltip dựng trong Shadow DOM nên CSS trang không sửa được nó và CSS của nó không rò ra trang. Tự lật hướng khi sát mép màn hình, ẩn khi rời chuột / scroll / `Esc` / ảnh lỗi.
+
 #### 1. Vẽ lại bộ icon extension
 - Thay icon đũa phép bằng hình cờ-lê + tua-vít bắt chéo, nói đúng hơn bản chất bộ công cụ đa năng (5 chức năng) thay vì chỉ autofill.
 - Bỏ khung nền squircle, icon là chính vật thể - theo kiểu các extension khác trên toolbar. Mỗi bộ phận có gradient chạy vuông góc với thân để tạo khối, thêm viền tối `#1E1B4B` bao ngoài.

@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnChecker = document.getElementById('btn-checker');
   const btnPassword = document.getElementById('btn-password');
   const btnJson = document.getElementById('btn-json');
+  const btnMarkdown = document.getElementById('btn-markdown');
   const btnSettings = document.getElementById('btn-settings');
 
   if (btnAutofill) {
@@ -37,6 +38,13 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnJson) {
     btnJson.addEventListener('click', () => {
       chrome.runtime.sendMessage({ type: "TRIGGER_JSON" });
+      window.close();
+    });
+  }
+
+  if (btnMarkdown) {
+    btnMarkdown.addEventListener('click', () => {
+      chrome.runtime.sendMessage({ type: "TRIGGER_MARKDOWN" });
       window.close();
     });
   }

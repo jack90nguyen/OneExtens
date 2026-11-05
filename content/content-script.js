@@ -96,9 +96,34 @@ function handleJsonRequest(sendResponse) {
   sendResponse({ ok: true, result });
 }
 
+function handleMarkdownRequest(sendResponse) {
+  const api = window.__autofillMarkdown;
+  if (!api) {
+    sendResponse({ ok: false, error: "Markdown runtime unavailable" });
+    return;
+  }
+
+  if (!api.isMarkdownDocument()) {
+    sendResponse({ ok: false, error: "This page is not a Markdown document." });
+    return;
+  }
+
+  const result = api.toggle();
+  if (!result.ok) {
+    sendResponse({ ok: false, error: "Could not render this Markdown (empty or too large)." });
+    return;
+  }
+
+  sendResponse({ ok: true, result });
+}
+
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message?.type === "RUN_AUTOFILL") {
     handleAutofillRequest(sendResponse);
+    return true;
+  }
+  if (message?.type === "TOGGLE_MARKDOWN") {
+    handleMarkdownRequest(sendResponse);
     return true;
   }
   if (message?.type === "TOGGLE_JSON") {

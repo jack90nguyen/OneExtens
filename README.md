@@ -7,6 +7,8 @@ Chrome Extension (Manifest V3) with two tools for frontend testing:
 - **Checkerboard** - automatically paints a checkerboard behind any standalone image page so PNG transparency is visible.
 - **Toggle Password** - flips every password field on the page to plain text and back, so a typed password can be checked.
 - **JSON View** - automatically renders a JSON response as a collapsible, colour-coded tree.
+- **Markdown View** - automatically renders a `.md` document as formatted HTML.
+- **Image link preview** - hovering a link that points at an image shows the image in a tooltip.
 
 It is designed for frontend testing on real pages with overlays/modals, and avoids filling hidden or covered fields.
 
@@ -65,6 +67,29 @@ When Chrome opens an image URL directly it sets an inline `background-color` on 
 - The last style Chrome wrote is kept, so turning the checkerboard off restores that exact attribute.
 - Runs for any `image/*` document, not just PNG (opaque formats simply cover the pattern).
 - The pattern is fixed at 24px in CSS pixels, so it does not scale when the image is zoomed.
+
+## Markdown View
+
+- Applied automatically when `contentType` is `text/markdown`, or when it is `text/plain` and the URL path ends in `.md` / `.markdown`.
+- Works for a remote URL and for a local `file://` path, though file access needs a manual opt-in (see the limits below).
+- Rendered by a small in-house parser, so the extension keeps its no-dependency, no-build-step setup. Supported: headings, bold, italic, strikethrough, inline code, fenced code, links, images, bare URLs, ordered and unordered lists with one level of nesting, blockquotes, horizontal rules and tables.
+- Markdown is untrusted input, so the source is HTML-escaped before any tag is produced, and a link or image URL is dropped to `#` unless its scheme is `http`, `https`, `mailto` or `file`. Raw HTML in the document shows as literal text rather than being parsed.
+- The original `<pre>` is hidden rather than removed; **Toggle Markdown View** in the popup swaps back to it.
+
+Known limits:
+
+- **`file://` needs a manual opt-in.** Chrome does not give an extension access to local files even with `<all_urls>`. Open `chrome://extensions`, find OneExtens, and turn on **Allow access to file URLs**. Without it a local `.md` stays as plain text.
+- Not supported: reference-style links (`[text][ref]`), footnotes, nested lists past one level, and raw HTML. Reference links render as the literal source text rather than breaking the page.
+
+## Image Link Preview
+
+- Always on, no toggle: hovering an `<a>` whose href ends in `.png`, `.jpg`, `.jpeg`, `.gif`, `.webp`, `.avif`, `.bmp`, `.svg` or `.ico` shows a tooltip preview. A query string or fragment after the extension is allowed.
+- A single delegated `mouseover` listener on the document handles every link, rather than one listener per anchor.
+- The tooltip waits 250 ms before showing, so sweeping the pointer across a list of links does not flash previews.
+- The image sits on a checkerboard so a transparent PNG reads properly, same pattern as the Checkerboard feature.
+- The tooltip lives in a shadow DOM, so page CSS cannot restyle it and its own CSS cannot leak into the page.
+- It flips to the other side of the pointer near a viewport edge, and hides on mouse-out, scroll, `Escape`, or an image that fails to load.
+- Links that do not end in an image extension are ignored, including a CDN URL that serves an image from an extension-less path.
 
 ## JSON View
 
@@ -140,6 +165,8 @@ autofill-extension/
     alpha-checker.js
     password-toggle.js
     json-viewer.js
+    markdown-viewer.js
+    link-preview.js
   data/
     dataset-manager.js
     random-generator.js
@@ -175,6 +202,8 @@ autofill-extension/
 - Opening a PNG URL shows a checkerboard automatically; use **Toggle Checkerboard** to turn it off for that page.
 - To read a password you are typing, open the menu and click **Toggle Password**.
 - Opening a `.json` URL shows a collapsible tree automatically; use **Toggle JSON View** to go back to the raw text.
+- Opening a `.md` file shows rendered Markdown automatically; use **Toggle Markdown View** to go back to the raw text.
+- Hover any link pointing at an image to preview it.
 - Or press `Alt + Shift + F` while the page is focused.
 - To customize dataset values, right click extension icon -> **Options**.
 - Autofill success has no popup/status message; only errors are alerted.

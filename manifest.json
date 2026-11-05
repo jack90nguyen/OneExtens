@@ -38,6 +38,8 @@
         "content/alpha-checker.js",
         "content/password-toggle.js",
         "content/json-viewer.js",
+        "content/markdown-viewer.js",
+        "content/link-preview.js",
         "content/content-script.js"
       ],
       "run_at": "document_idle"
