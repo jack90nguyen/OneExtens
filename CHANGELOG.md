@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 2026-11-05
+
+#### 1. Vẽ lại bộ icon extension
+- Thay icon đũa phép bằng hình cờ-lê + tua-vít bắt chéo, nói đúng hơn bản chất bộ công cụ đa năng (5 chức năng) thay vì chỉ autofill.
+- Bỏ khung nền squircle, icon là chính vật thể - theo kiểu các extension khác trên toolbar. Mỗi bộ phận có gradient chạy vuông góc với thân để tạo khối, thêm viền tối `#1E1B4B` bao ngoài.
+- Viền tối là thứ giữ cho hình không tan vào toolbar sáng: tương phản `13.66` trên nền `#EDEDED`, trong khi cán cam chỉ được `1.83` và trục bạc `1.27`.
+- Chuyển master sang **`icons/icon.svg`** (vector). Các size render thẳng từ SVG bằng `rsvg-convert`, mỗi size render riêng chứ không resize từ ảnh lớn - nét hơn hẳn cách cũ.
+- Xoá `logo-app.png` (master cũ dạng ảnh AI). Ảnh raster resize xuống 16px là nhoè thành đốm màu, đây là lý do đổi sang vector.
+- `manifest.json` không đổi, đường dẫn icon giữ nguyên.
+
 ## 2026-10-28
 
 #### 1. Tự động format link JSON (JSON View)
