@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnPassword = document.getElementById('btn-password');
   const btnJson = document.getElementById('btn-json');
   const btnMarkdown = document.getElementById('btn-markdown');
+  const btnDark = document.getElementById('btn-dark');
   const btnSettings = document.getElementById('btn-settings');
 
   if (btnAutofill) {
@@ -45,6 +46,13 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnMarkdown) {
     btnMarkdown.addEventListener('click', () => {
       chrome.runtime.sendMessage({ type: "TRIGGER_MARKDOWN" });
+      window.close();
+    });
+  }
+
+  if (btnDark) {
+    btnDark.addEventListener('click', () => {
+      chrome.runtime.sendMessage({ type: "TRIGGER_DARK" });
       window.close();
     });
   }

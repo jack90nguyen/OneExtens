@@ -117,7 +117,21 @@ function handleMarkdownRequest(sendResponse) {
   sendResponse({ ok: true, result });
 }
 
+function handleDarkRequest(sendResponse) {
+  const api = window.__autofillDarkMode;
+  if (!api) {
+    sendResponse({ ok: false, error: "Dark mode runtime unavailable" });
+    return;
+  }
+
+  sendResponse({ ok: true, result: api.toggle() });
+}
+
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  if (message?.type === "TOGGLE_DARK") {
+    handleDarkRequest(sendResponse);
+    return true;
+  }
   if (message?.type === "RUN_AUTOFILL") {
     handleAutofillRequest(sendResponse);
     return true;

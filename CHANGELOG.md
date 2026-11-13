@@ -1,5 +1,25 @@
 # CHANGELOG
 
+## 2026-11-13
+
+#### 1. Ép dark mode cho mọi trang (Toggle Dark Mode)
+
+**Dark mode** (`content/dark-mode.js`)
+- Nút **Toggle Dark Mode** trong popup ép trang hiện tại sang nền tối, kể cả site không hề có dark theme. Bấm lại là trả về nguyên trạng.
+- Cách làm: `filter: invert(1) hue-rotate(180deg) contrast(0.75)` trên `<html>`. `invert(1)` lật sáng - tối, `hue-rotate(180deg)` kéo màu về đúng tông, thiếu nó thì xanh hoá cam.
+- `contrast(0.75)` kéo hai đầu về phía xám giữa để trang không đen tuyền. Trang trắng tinh ra nền `#202020` chữ `#dfdfdf`, bám theo UI dark tham chiếu đo được `#1f1f24` nền / `#e3e3e4` chữ. Tỷ lệ tương phản 12.2:1, vượt ngưỡng AAA.
+- Ảnh, video, canvas, svg, iframe và element có `background-image` inline được áp `contrast(1.333) invert(1) hue-rotate(180deg)` - đúng nghịch đảo của chuỗi filter ở root, nên media giữ nguyên cả màu thật lẫn độ tương phản gốc.
+- Đánh đổi: pixel trắng tinh trong ảnh bị nén còn `#dfdfdf`, đen tuyền còn `#202020` do `contrast(1.333)` đẩy quá trần kênh màu rồi bị clamp. Vùng giữa khoảng 9% - 91% độ sáng giữ nguyên 100%.
+- Toàn bộ hiệu ứng nằm trong **một thẻ `<style>`** chèn vào `documentElement`. Không đụng DOM lẫn stylesheet của trang nên tắt đi là sạch tuyệt đối.
+- Không chọn hướng duyệt DOM đọc computed style rồi đổi từng màu kiểu Dark Reader: chuẩn màu hơn nhưng tốn cả ngàn dòng và chậm trên trang lớn.
+- Nhớ lựa chọn **theo hostname** trong `chrome.storage.local`, load lại trang là tự tối lại, khỏi bấm nút mỗi lần.
+- Đo thực tế trên `wrappiness.co`: element `position: fixed` và `sticky` giữ nguyên rect khi bật filter (`top` 605 / `left` 1391 ở cả hai trạng thái), header dính vẫn bám đỉnh. Trái với lo ngại ban đầu - Chrome không lấy `<html>` có filter làm containing block cho fixed.
+- Giới hạn: trang vốn đã tối thì bấm vào sẽ hoá sáng, không có detect. Màu thương hiệu bị lật với logo nền trong suốt, icon font, gradient CSS. Site đã nhớ sẽ nháy trắng ngắn lúc load do content script chạy ở `document_idle`.
+- Host của tooltip hover preview (`#__onex-link-preview`) cũng được triệt tiêu filter. Stylesheet cấp document không xuyên được vào shadow root nên không với tới thẻ `<img>` bên trong - đặt filter ở chính thẻ host thì phủ luôn cả cây shadow.
+- Giới hạn còn lại: `<img>` nằm trong shadow DOM của chính trang web (web component) vẫn bị lật, cùng lý do trên. Muốn phủ hết phải duyệt mọi shadow root rồi bơm `adoptedStyleSheets`, chưa làm ở bản này.
+- Không thêm permission, dùng lại `content_scripts` trên `<all_urls>` sẵn có. Bump version `1.2.0` -> `1.3.0`.
+
+
 ## 2026-11-05
 
 #### 2. Markdown viewer + hover preview ảnh

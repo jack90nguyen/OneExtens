@@ -298,7 +298,35 @@ function runMarkdownToggle() {
   });
 }
 
+function runDarkToggle() {
+  chrome.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
+    const tab = tabs[0];
+    const tabId = tab && tab.id;
+    if (!tabId) {
+      return;
+    }
+
+    chrome.tabs
+      .sendMessage(tabId, { type: "TOGGLE_DARK" })
+      .then((response) => {
+        if (!response || !response.ok) {
+          const errorMessage = getErrorMessage(response && response.error, "Dark mode failed on this page.");
+          showTabAlert(tabId, errorMessage);
+        }
+      })
+      .catch((error) => {
+        const errorMessage = getErrorMessage(error, "Cannot toggle dark mode on this page.");
+        showTabAlert(tabId, errorMessage);
+      });
+  });
+}
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type === "TRIGGER_DARK") {
+    runDarkToggle();
+    return false;
+  }
+
   if (message.type === "TRIGGER_AUTOFILL") {
     runAutofill();
     return false;

@@ -9,6 +9,7 @@ Chrome Extension (Manifest V3) with two tools for frontend testing:
 - **JSON View** - automatically renders a JSON response as a collapsible, colour-coded tree.
 - **Markdown View** - automatically renders a `.md` document as formatted HTML.
 - **Image link preview** - hovering a link that points at an image shows the image in a tooltip.
+- **Dark Mode** - forces a dark page on any site, including sites that ship no dark theme of their own.
 
 It is designed for frontend testing on real pages with overlays/modals, and avoids filling hidden or covered fields.
 
@@ -91,6 +92,28 @@ Known limits:
 - It flips to the other side of the pointer near a viewport edge, and hides on mouse-out, scroll, `Escape`, or an image that fails to load.
 - Links that do not end in an image extension are ignored, including a CDN URL that serves an image from an extension-less path.
 
+## Dark Mode
+
+Forces a dark page on a site that has no dark theme.
+
+- Trigger: click the extension icon, then **Toggle Dark Mode**. Click again to go back.
+- The whole page is inverted with `filter: invert(1) hue-rotate(180deg) contrast(0.75)` on `<html>`. `invert(1)` swaps light and dark, `hue-rotate(180deg)` puts the hue back where it was, so blue stays blue instead of turning orange.
+- `contrast(0.75)` pulls both ends toward mid grey, so a plain white page lands on `#202020` with `#dfdfdf` text instead of pure black on pure white. Measured against a reference dark UI at `#1f1f24` canvas / `#e3e3e4` text. Contrast ratio is 12.2:1, well past WCAG AAA.
+- Images, video, canvas, svg, iframes and inline `background-image` elements get `contrast(1.333) invert(1) hue-rotate(180deg)`, the exact inverse of the root filter, so media keeps its real colours and its authored contrast.
+- The hover-preview host `#__onex-link-preview` is cancelled the same way. A document stylesheet cannot reach the `<img>` inside its shadow root, so the filter goes on the host instead and covers the whole shadow tree at once.
+- The whole effect is one injected `<style>` element. Nothing in the page DOM or its stylesheets is touched, so turning it off restores the page exactly.
+- The choice is stored per hostname in `chrome.storage.local`, so the same site comes back dark on the next load without another click.
+
+Known limits:
+
+- A site that is already dark turns light: the filter is unconditional, there is no detection of an existing dark theme.
+- Brand colours flip. A transparent-background logo, an icon font, or a CSS gradient reads in the opposite hue, because only real media elements are re-inverted.
+- On a remembered site there is a short white flash on load, since the content script runs at `document_idle` rather than `document_start`.
+- A page that sets its own `filter` on `<html>` is overridden while dark mode is on.
+- Pure white and pure black pixels inside an image are compressed to `#dfdfdf` and `#202020`: `contrast(1.333)` pushes them past the channel limit and they clamp. Everything between roughly 9% and 91% lightness comes through untouched, and the clamped extremes match the page tone rather than punching a white hole in a dark page.
+- An `<img>` inside a page's own shadow DOM (a web component) is still inverted, for the same reason: the re-invert rule is a document stylesheet and does not cross a shadow boundary. Covering those would mean walking every shadow root and injecting `adoptedStyleSheets`, which is not done here.
+- Measured on a real page: `position: fixed` and `position: sticky` elements keep their exact rects with the filter on, so sticky headers are not affected in Chrome.
+
 ## JSON View
 
 Chrome serves a `.json` URL as a single unwrapped line inside a `<pre>`, which is unreadable for anything larger than a few keys.
@@ -167,6 +190,7 @@ autofill-extension/
     json-viewer.js
     markdown-viewer.js
     link-preview.js
+    dark-mode.js
   data/
     dataset-manager.js
     random-generator.js
@@ -204,6 +228,7 @@ autofill-extension/
 - Opening a `.json` URL shows a collapsible tree automatically; use **Toggle JSON View** to go back to the raw text.
 - Opening a `.md` file shows rendered Markdown automatically; use **Toggle Markdown View** to go back to the raw text.
 - Hover any link pointing at an image to preview it.
+- To force a dark page on a site with no dark theme, open the menu and click **Toggle Dark Mode**. The site stays dark on later visits until you toggle it off.
 - Or press `Alt + Shift + F` while the page is focused.
 - To customize dataset values, right click extension icon -> **Options**.
 - Autofill success has no popup/status message; only errors are alerted.
