@@ -89,6 +89,7 @@ Known limits:
 - The tooltip waits 250 ms before showing, so sweeping the pointer across a list of links does not flash previews.
 - The image sits on a checkerboard so a transparent PNG reads properly, same pattern as the Checkerboard feature.
 - The tooltip lives in a shadow DOM, so page CSS cannot restyle it and its own CSS cannot leak into the page.
+- Its `.box` reads `filter: var(--onex-unfilter, none)`, which is how **Dark Mode** cancels the page-wide inversion for the preview. With dark mode off the property is unset and the fallback keeps the filter at `none`.
 - It flips to the other side of the pointer near a viewport edge, and hides on mouse-out, scroll, `Escape`, or an image that fails to load.
 - Links that do not end in an image extension are ignored, including a CDN URL that serves an image from an extension-less path.
 
@@ -100,7 +101,8 @@ Forces a dark page on a site that has no dark theme.
 - The whole page is inverted with `filter: invert(1) hue-rotate(180deg) contrast(0.75)` on `<html>`. `invert(1)` swaps light and dark, `hue-rotate(180deg)` puts the hue back where it was, so blue stays blue instead of turning orange.
 - `contrast(0.75)` pulls both ends toward mid grey, so a plain white page lands on `#202020` with `#dfdfdf` text instead of pure black on pure white. Measured against a reference dark UI at `#1f1f24` canvas / `#e3e3e4` text. Contrast ratio is 12.2:1, well past WCAG AAA.
 - Images, video, canvas, svg, iframes and inline `background-image` elements get `contrast(1.333) invert(1) hue-rotate(180deg)`, the exact inverse of the root filter, so media keeps its real colours and its authored contrast.
-- The hover-preview host `#__onex-link-preview` is cancelled the same way. A document stylesheet cannot reach the `<img>` inside its shadow root, so the filter goes on the host instead and covers the whole shadow tree at once.
+- A document stylesheet cannot reach inside a shadow root, so the hover preview is handed the inverse filter as a custom property, `--onex-unfilter`, which crosses the shadow boundary because custom properties inherit. `link-preview.js` applies it to its own `.box`.
+- That property must not become a `filter` on the preview host: a filter on a non-root element makes it the containing block for its `position: fixed` descendants, which pushed the tooltip to the host's own spot at the end of the document instead of next to the pointer.
 - The whole effect is one injected `<style>` element. Nothing in the page DOM or its stylesheets is touched, so turning it off restores the page exactly.
 - The choice is stored per hostname in `chrome.storage.local`, so the same site comes back dark on the next load without another click.
 

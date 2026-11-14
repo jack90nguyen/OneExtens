@@ -22,6 +22,10 @@
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.32);
     font: 12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     color: #59636e;
+    /* Dark mode inverts the whole page, so it hands us the inverse filter to
+       cancel it with. It goes here rather than on the host: a filter on the
+       host would make it the containing block for this fixed box. */
+    filter: var(--onex-unfilter, none);
   }
   .box.on { display: block; }
   .status { padding: 6px 10px; }

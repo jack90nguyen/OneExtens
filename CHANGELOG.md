@@ -15,7 +15,8 @@
 - Nhớ lựa chọn **theo hostname** trong `chrome.storage.local`, load lại trang là tự tối lại, khỏi bấm nút mỗi lần.
 - Đo thực tế trên `wrappiness.co`: element `position: fixed` và `sticky` giữ nguyên rect khi bật filter (`top` 605 / `left` 1391 ở cả hai trạng thái), header dính vẫn bám đỉnh. Trái với lo ngại ban đầu - Chrome không lấy `<html>` có filter làm containing block cho fixed.
 - Giới hạn: trang vốn đã tối thì bấm vào sẽ hoá sáng, không có detect. Màu thương hiệu bị lật với logo nền trong suốt, icon font, gradient CSS. Site đã nhớ sẽ nháy trắng ngắn lúc load do content script chạy ở `document_idle`.
-- Host của tooltip hover preview (`#__onex-link-preview`) cũng được triệt tiêu filter. Stylesheet cấp document không xuyên được vào shadow root nên không với tới thẻ `<img>` bên trong - đặt filter ở chính thẻ host thì phủ luôn cả cây shadow.
+- Tooltip hover preview nhận filter nghịch đảo qua biến CSS `--onex-unfilter`. Stylesheet cấp document không xuyên được vào shadow root, nhưng custom property thì kế thừa xuyên qua ranh giới shadow, nên `link-preview.js` tự áp vào `.box` của nó.
+- Không được đặt filter lên chính thẻ host: filter trên element không phải root biến nó thành containing block cho con `position: fixed`, làm tooltip văng xuống vị trí của host ở cuối document thay vì nằm cạnh con trỏ. Đo được lệch đúng 2134px, bằng `hostRect.y`.
 - Giới hạn còn lại: `<img>` nằm trong shadow DOM của chính trang web (web component) vẫn bị lật, cùng lý do trên. Muốn phủ hết phải duyệt mọi shadow root rồi bơm `adoptedStyleSheets`, chưa làm ở bản này.
 - Không thêm permission, dùng lại `content_scripts` trên `<all_urls>` sẵn có. Bump version `1.2.0` -> `1.3.0`.
 

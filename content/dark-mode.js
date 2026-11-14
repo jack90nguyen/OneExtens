@@ -16,16 +16,23 @@
   // second time, which cancels the one inherited from <html>, plus the inverse
   // contrast so a photo keeps the contrast it was authored with.
   //
-  // The hover-preview host is listed too: a document stylesheet cannot reach
-  // the <img> inside its shadow root, so the cancelling filter goes on the
-  // host, which covers the whole shadow tree at once.
+  // A document stylesheet cannot reach inside a shadow root, so the hover
+  // preview gets the cancelling filter handed to it as a custom property.
+  // Custom properties are inherited, so this one crosses the shadow boundary;
+  // link-preview.js reads it as var(--onex-unfilter, none).
+  //
+  // It must not be set on the preview host itself: a filter on a non-root
+  // element makes it the containing block for its position: fixed descendants,
+  // which moved the tooltip to the host's own spot at the end of the document
+  // instead of next to the pointer.
   const CSS = `
 html {
   background-color: #ffffff !important;
   filter: invert(1) hue-rotate(180deg) contrast(${SOFTEN}) !important;
+  --onex-unfilter: contrast(${UNSOFTEN}) invert(1) hue-rotate(180deg);
 }
 img, video, picture, canvas, svg, iframe, embed, object,
-[style*="background-image"], #__onex-link-preview {
+[style*="background-image"] {
   filter: contrast(${UNSOFTEN}) invert(1) hue-rotate(180deg) !important;
 }
 `;
