@@ -2,6 +2,14 @@
 
 ## 2026-11-16
 
+#### 2. Tooltip preview ảnh lên 720px, kẹp theo viewport
+
+- `MAX_SIDE` từ `520` lên `720`.
+- `max-width` / `max-height` đổi từ số cố định sang `min(720px, calc(100vh - 32px))`. Màn rộng ăn trọn 720, màn hẹp ảnh tự co vừa khít.
+- Dùng đơn vị viewport chứ không đo bằng JS, nên **resize cửa sổ là cập nhật ngay** - đo lúc mở tooltip thì resize xong phải hover lại mới đúng.
+- Sửa luôn lỗi tràn đáy `62px` tồn tại từ hồi để `520px` cố định. Đo lại 3 kích thước: `1920x1500`, `1280x480`, `900x300` - hover giữa và sát góc phải dưới đều nằm trọn, tràn `0`.
+- Giới hạn `100vw` tính cả bề rộng thanh cuộn dọc nên chiều ngang dư ít hơn ~15px. Không tràn vì `place()` vẫn lật hướng và kẹp mép.
+
 #### 1. Chọn màu nền caro trong Settings
 
 **Module dùng chung** (`data/checker-palette.js`)

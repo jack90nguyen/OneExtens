@@ -2,7 +2,7 @@
   "use strict";
 
   const SHOW_DELAY_MS = 250;
-  const MAX_SIDE = 520;
+  const MAX_SIDE = 720;
   const CURSOR_GAP = 16;
   const EDGE_GAP = 8;
   const IMAGE_PATTERN = /\.(png|jpe?g|gif|webp|avif|bmp|svg|ico)(?:[?#]|$)/i;
@@ -33,8 +33,12 @@
      onto the box as custom properties so a saved change repaints in place. */
   img {
     display: none;
-    max-width: ${MAX_SIDE}px;
-    max-height: ${MAX_SIDE}px;
+    /* Viewport units rather than a measured number: the cap then follows a
+       window resize on its own, where a value read when the tooltip opened
+       would stay stale until the next hover. EDGE_GAP * 2 plus the box's own
+       padding and border come to 30px, so 32 leaves a little slack. */
+    max-width: min(${MAX_SIDE}px, calc(100vw - 32px));
+    max-height: min(${MAX_SIDE}px, calc(100vh - 32px));
     border-radius: 5px;
     background-color: var(--onex-checker-base, #9a9a9a);
     background-image:

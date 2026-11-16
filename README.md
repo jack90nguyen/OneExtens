@@ -111,6 +111,7 @@ Known limits:
 - The tooltip lives in a shadow DOM, so page CSS cannot restyle it and its own CSS cannot leak into the page.
 - Its `.box` reads `filter: var(--onex-unfilter, none)`, which is how **Dark Mode** cancels the page-wide inversion for the preview. With dark mode off the property is unset and the fallback keeps the filter at `none`.
 - It flips to the other side of the pointer near a viewport edge, and hides on mouse-out, scroll, `Escape`, or an image that fails to load.
+- The image is capped at `min(720px, calc(100vh - 32px))` on each side. Viewport units rather than a measured number, so the cap follows a window resize on its own: a value read when the tooltip opened would stay stale until the next hover. The 32px covers the 8px edge gap on both sides plus the box's own padding and border.
 - Links that do not end in an image extension are ignored, including a CDN URL that serves an image from an extension-less path.
 
 ## Dark Mode
