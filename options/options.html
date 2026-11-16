@@ -120,6 +120,74 @@
         background: #f0f4f8;
       }
 
+      select {
+        width: 100%;
+        box-sizing: border-box;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: #fff;
+        color: var(--text);
+        font-size: 13px;
+        padding: 8px 10px;
+        font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+      }
+
+      .colors {
+        display: flex;
+        gap: 16px;
+      }
+
+      .color-field {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+        font-size: 13px;
+        color: #2f3f54;
+      }
+
+      .color-field input[type="color"] {
+        width: 44px;
+        height: 30px;
+        padding: 2px;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: #fff;
+        cursor: pointer;
+      }
+
+      /* Two swatches of the live palette, one carrying a white shape and one a
+         black shape, so both failure modes are visible before saving. */
+      .checker-preview {
+        display: flex;
+        gap: 12px;
+      }
+
+      .swatch {
+        width: 120px;
+        height: 72px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        display: block;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .swatch::after {
+        content: "";
+        position: absolute;
+        inset: 18px 28px;
+        border-radius: 6px;
+      }
+
+      .swatch-light::after {
+        background: #ffffff;
+      }
+
+      .swatch-dark::after {
+        background: #000000;
+      }
+
       .status {
         margin-top: 12px;
         border: 1px solid var(--border);
@@ -198,8 +266,52 @@
 
         <div class="status" id="status" role="status" aria-live="polite">Ready</div>
       </section>
+
+      <section class="card" style="margin-top: 16px">
+        <h1>Image Background</h1>
+        <p>
+          The checkerboard drawn behind a transparent PNG, both on a standalone image page and
+          in the hover preview. No single tone works for every image: a white fringe disappears
+          on Light, and a dark subject disappears on Dark.
+        </p>
+
+        <div class="row">
+          <label for="checkerPreset">Palette</label>
+          <select id="checkerPreset"></select>
+        </div>
+
+        <div class="row" id="customRow" hidden>
+          <label>Custom colours</label>
+          <div class="colors">
+            <label class="color-field">
+              <span>Base</span>
+              <input id="checkerBase" type="color" value="#9a9a9a" />
+            </label>
+            <label class="color-field">
+              <span>Tile</span>
+              <input id="checkerTile" type="color" value="#6e6e6e" />
+            </label>
+          </div>
+        </div>
+
+        <div class="row">
+          <label>Preview</label>
+          <div class="checker-preview" id="checkerPreview">
+            <span class="swatch swatch-light"></span>
+            <span class="swatch swatch-dark"></span>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="saveChecker" type="button">Save Background</button>
+          <button id="restoreChecker" type="button" class="ghost">Restore Default</button>
+        </div>
+
+        <div class="status" id="checkerStatus" role="status" aria-live="polite">Ready</div>
+      </section>
     </main>
     <script src="../data/dataset-manager.js"></script>
+    <script src="../data/checker-palette.js"></script>
     <script src="options.js"></script>
   </body>
 </html>

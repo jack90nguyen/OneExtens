@@ -29,17 +29,19 @@
   }
   .box.on { display: block; }
   .status { padding: 6px 10px; }
+  /* The checkerboard colours come from the Image Background setting, written
+     onto the box as custom properties so a saved change repaints in place. */
   img {
     display: none;
     max-width: ${MAX_SIDE}px;
     max-height: ${MAX_SIDE}px;
     border-radius: 5px;
-    background-color: #ffffff;
+    background-color: var(--onex-checker-base, #9a9a9a);
     background-image:
-      linear-gradient(45deg, #c8c8c8 25%, transparent 25%),
-      linear-gradient(-45deg, #c8c8c8 25%, transparent 25%),
-      linear-gradient(45deg, transparent 75%, #c8c8c8 75%),
-      linear-gradient(-45deg, transparent 75%, #c8c8c8 75%);
+      linear-gradient(45deg, var(--onex-checker-tile, #6e6e6e) 25%, transparent 25%),
+      linear-gradient(-45deg, var(--onex-checker-tile, #6e6e6e) 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, var(--onex-checker-tile, #6e6e6e) 75%),
+      linear-gradient(-45deg, transparent 75%, var(--onex-checker-tile, #6e6e6e) 75%);
     background-size: 16px 16px;
     background-position: 0 0, 0 8px, 8px -8px, -8px 0;
   }
@@ -57,9 +59,21 @@
     status: null,
     timer: null,
     anchor: null,
+    palette: null,
     x: 0,
     y: 0
   };
+
+  function applyPalette() {
+    const api = window.__onexCheckerPalette;
+    if (!state.box || !api) {
+      return;
+    }
+
+    const { base, tile } = api.normalize(state.palette);
+    state.box.style.setProperty("--onex-checker-base", base);
+    state.box.style.setProperty("--onex-checker-tile", tile);
+  }
 
   function isImageLink(anchor) {
     const href = anchor.getAttribute("href") || "";
@@ -86,6 +100,7 @@
     state.status = shadow.querySelector(".status");
     state.image.addEventListener("load", place);
     state.image.addEventListener("error", hide);
+    applyPalette();
   }
 
   function place() {
@@ -171,6 +186,18 @@
       hide();
     }
   });
+
+  const paletteApi = window.__onexCheckerPalette;
+  if (paletteApi) {
+    paletteApi.load().then((palette) => {
+      state.palette = palette;
+      applyPalette();
+    });
+    paletteApi.onChange((palette) => {
+      state.palette = palette;
+      applyPalette();
+    });
+  }
 
   window.__autofillLinkPreview = {
     isImageLink,

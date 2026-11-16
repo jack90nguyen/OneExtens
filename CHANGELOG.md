@@ -1,5 +1,28 @@
 # CHANGELOG
 
+## 2026-11-16
+
+#### 1. Chọn màu nền caro trong Settings
+
+**Module dùng chung** (`data/checker-palette.js`)
+- Gom bảng màu, giá trị mặc định, hàm đọc / ghi storage và hàm sinh CSS gradient về một chỗ. Trước đó màu bị chép cứng ở 2 file, sửa 1 nơi là lệch nơi còn lại.
+- Giá trị lưu được validate trước khi đưa vào CSS: id lạ, hex không đủ 6 ký tự, hoặc chuỗi kiểu `red; }` đều rơi về mặc định. Đã test 4 trường hợp này.
+
+**Trang Settings** (`options/options.html`, `options/options.js`)
+- Thêm section **Image Background** riêng, không trộn vào phần dataset đang có. Gồm dropdown 4 preset + Custom với 2 ô color picker.
+- Ô preview hiện bảng màu đang chọn kèm **một hình trắng và một hình đen**, thấy ngay cả hai kiểu hỏng trước khi bấm lưu.
+- Lưu vào `chrome.storage.sync` key `checkerPalette`, theo profile Chrome.
+
+**Áp dụng** (`content/alpha-checker.js`, `content/link-preview.js`)
+- Cả trang ảnh đứng một mình lẫn tooltip hover đều đọc cùng một nguồn màu.
+- Nghe `chrome.storage.onChanged` nên lưu xong là tab đang mở **đổi màu ngay**, không cần F5. Tooltip truyền màu qua CSS variable để cập nhật được trong shadow DOM.
+
+**Đổi mặc định từ Light sang Grey** (`#9a9a9a` / `#6e6e6e`)
+- Lý do: ảnh PNG có viền trắng thì viền đó tương phản đúng `1.00` trên ô trắng của bảng Light - vô hình chứ không phải mờ. Bảng Dark chữa được viền trắng (`11.37`) nhưng giết vùng đen (`1.85`).
+- Grey là bảng duy nhất trong 4 cái giữ được cả hai đầu: trắng `2.81`, đen `7.46`. Ai quen nền trắng thì chọn lại Light trong Settings.
+- Đây là **thay đổi hành vi** với người đã dùng bản cũ.
+
+
 ## 2026-11-13
 
 #### 1. Ép dark mode cho mọi trang (Toggle Dark Mode)

@@ -4,7 +4,7 @@ Chrome Extension (Manifest V3) with two tools for frontend testing:
 
 - **Auto Fill Form** - autofills only form fields that are currently visible, interactable, and fully inside the viewport.
 - **Capture Full Page** - takes a full-page screenshot by scrolling and stitching the visible viewport captures.
-- **Checkerboard** - automatically paints a checkerboard behind any standalone image page so PNG transparency is visible.
+- **Checkerboard** - automatically paints a checkerboard behind any standalone image page so PNG transparency is visible, in a palette you pick in Settings.
 - **Toggle Password** - flips every password field on the page to plain text and back, so a typed password can be checked.
 - **JSON View** - automatically renders a JSON response as a collapsible, colour-coded tree.
 - **Markdown View** - automatically renders a `.md` document as formatted HTML.
@@ -68,6 +68,26 @@ When Chrome opens an image URL directly it sets an inline `background-color` on 
 - The last style Chrome wrote is kept, so turning the checkerboard off restores that exact attribute.
 - Runs for any `image/*` document, not just PNG (opaque formats simply cover the pattern).
 - The pattern is fixed at 24px in CSS pixels, so it does not scale when the image is zoomed.
+
+
+### Image Background palette
+
+The checkerboard colours are a setting, not a constant, because no single tone works for every image. Pick one under **Settings → Image Background**.
+
+| Palette | Colours | White fringe | Black region |
+|---|---|---|---|
+| Light | `#ffffff` / `#c8c8c8` | **1.00** | 21.00 |
+| Grey (default) | `#9a9a9a` / `#6e6e6e` | 2.81 | 7.46 |
+| Dark | `#3a3a3a` / `#2b2b2b` | 11.37 | **1.85** |
+| Magenta | `#ff00ff` / `#d400d4` | 3.14 | 6.70 |
+| Custom | your two colours | — | — |
+
+Contrast ratios are WCAG, measured against the lighter of the two tones. Grey is the default because it is the only preset where neither end drops out: Light puts a white fringe at exactly `1.00`, which is not faint but invisible, and Dark does the same to a black subject at `1.85`.
+
+- Stored in `chrome.storage.sync` under `checkerPalette`, so it follows the Chrome profile.
+- The option page previews the palette against both a white and a black shape before you save.
+- Saving repaints any open image tab and the hover preview immediately, through `chrome.storage.onChanged`. No reload needed.
+- A stored value that is not a known preset id, or a custom pair that is not two 6-digit hex colours, falls back to Grey rather than reaching CSS.
 
 ## Markdown View
 
@@ -195,6 +215,7 @@ autofill-extension/
     dark-mode.js
   data/
     dataset-manager.js
+    checker-palette.js
     random-generator.js
     field-detector.js
   utils/
@@ -226,6 +247,7 @@ autofill-extension/
 - Click the extension icon to open the menu, then click **Auto Fill Form**.
 - To screenshot the whole page, open the menu and click **Capture Full Page**.
 - Opening a PNG URL shows a checkerboard automatically; use **Toggle Checkerboard** to turn it off for that page.
+- To change the checkerboard colours, right click the icon -> **Options** -> **Image Background**.
 - To read a password you are typing, open the menu and click **Toggle Password**.
 - Opening a `.json` URL shows a collapsible tree automatically; use **Toggle JSON View** to go back to the raw text.
 - Opening a `.md` file shows rendered Markdown automatically; use **Toggle Markdown View** to go back to the raw text.

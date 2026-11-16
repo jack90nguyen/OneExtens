@@ -1,17 +1,18 @@
 (() => {
   "use strict";
 
-  const CHECKER_COLOR = "#c8c8c8";
-  const CHECKER_SIZE = 24;
-  const HALF = CHECKER_SIZE / 2;
-
   const OBSERVE_OPTIONS = { attributes: true, attributeFilter: ["style"] };
 
   const state = {
     image: null,
     baseStyle: "",
-    observer: null
+    observer: null,
+    palette: null
   };
+
+  function paletteApi() {
+    return window.__onexCheckerPalette || null;
+  }
 
   function isImageDocument() {
     return typeof document.contentType === "string" && document.contentType.startsWith("image/");
@@ -22,23 +23,20 @@
   // drops the queued records for our own writes.
   function paint() {
     const image = state.image;
+    const api = paletteApi();
+    if (!image || !api) {
+      return;
+    }
+
+    const css = api.toCss(state.palette);
     if (state.observer) {
       state.observer.disconnect();
     }
 
-    image.style.setProperty("background-color", "#ffffff", "important");
-    image.style.setProperty(
-      "background-image",
-      [
-        `linear-gradient(45deg, ${CHECKER_COLOR} 25%, transparent 25%)`,
-        `linear-gradient(-45deg, ${CHECKER_COLOR} 25%, transparent 25%)`,
-        `linear-gradient(45deg, transparent 75%, ${CHECKER_COLOR} 75%)`,
-        `linear-gradient(-45deg, transparent 75%, ${CHECKER_COLOR} 75%)`
-      ].join(","),
-      "important"
-    );
-    image.style.setProperty("background-size", `${CHECKER_SIZE}px ${CHECKER_SIZE}px`, "important");
-    image.style.setProperty("background-position", `0 0, 0 ${HALF}px, ${HALF}px -${HALF}px, -${HALF}px 0`, "important");
+    image.style.setProperty("background-color", css.backgroundColor, "important");
+    image.style.setProperty("background-image", css.backgroundImage, "important");
+    image.style.setProperty("background-size", css.backgroundSize, "important");
+    image.style.setProperty("background-position", css.backgroundPosition, "important");
     image.style.setProperty("transition", "none", "important");
 
     if (state.observer) {
@@ -98,7 +96,30 @@
     toggle
   };
 
+  const api = paletteApi();
+  if (api) {
+    // Repaint in place when the option page saves, so an image tab that is
+    // already open picks up the new colours without a reload.
+    api.onChange((palette) => {
+      state.palette = palette;
+      if (state.observer) {
+        paint();
+      }
+    });
+  }
+
   if (isImageDocument()) {
+    // The stored palette arrives a tick later than document_idle, so paint
+    // with the default first and repaint once it resolves. That keeps the
+    // checkerboard from flashing in after the image is already on screen.
     enable();
+    if (api) {
+      api.load().then((palette) => {
+        state.palette = palette;
+        if (state.observer) {
+          paint();
+        }
+      });
+    }
   }
 })();

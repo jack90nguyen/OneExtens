@@ -150,3 +150,101 @@ saveButton.addEventListener("click", saveDatasetEditor);
 restoreButton.addEventListener("click", restoreDefaults);
 
 loadDatasetEditor();
+
+/* ---------------------------------------------------------------------------
+   Image background
+   Kept separate from the dataset editor above: different storage key, its own
+   status line, and no shared state beyond the storage helpers.
+--------------------------------------------------------------------------- */
+
+const paletteApi = window.__onexCheckerPalette || null;
+const presetSelect = document.getElementById("checkerPreset");
+const customRow = document.getElementById("customRow");
+const baseInput = document.getElementById("checkerBase");
+const tileInput = document.getElementById("checkerTile");
+const previewEl = document.getElementById("checkerPreview");
+const checkerStatusEl = document.getElementById("checkerStatus");
+const saveCheckerButton = document.getElementById("saveChecker");
+const restoreCheckerButton = document.getElementById("restoreChecker");
+
+function setCheckerStatus(text) {
+  if (checkerStatusEl) {
+    checkerStatusEl.textContent = text;
+  }
+}
+
+function currentPalette() {
+  if (presetSelect.value === paletteApi.CUSTOM_ID) {
+    return { id: paletteApi.CUSTOM_ID, base: baseInput.value, tile: tileInput.value };
+  }
+
+  return { id: presetSelect.value };
+}
+
+function renderPreview() {
+  const css = paletteApi.toCss(currentPalette());
+  for (const swatch of previewEl.querySelectorAll(".swatch")) {
+    swatch.style.backgroundColor = css.backgroundColor;
+    swatch.style.backgroundImage = css.backgroundImage;
+    swatch.style.backgroundSize = css.backgroundSize;
+    swatch.style.backgroundPosition = css.backgroundPosition;
+  }
+
+  customRow.hidden = presetSelect.value !== paletteApi.CUSTOM_ID;
+}
+
+function buildPresetOptions() {
+  for (const preset of paletteApi.PRESETS) {
+    const option = document.createElement("option");
+    option.value = preset.id;
+    option.textContent = `${preset.label} — ${preset.note}`;
+    presetSelect.appendChild(option);
+  }
+
+  const custom = document.createElement("option");
+  custom.value = paletteApi.CUSTOM_ID;
+  custom.textContent = "Custom — pick your own two colours";
+  presetSelect.appendChild(custom);
+}
+
+function setPaletteForm(palette) {
+  presetSelect.value = palette.id;
+  baseInput.value = palette.base;
+  tileInput.value = palette.tile;
+  renderPreview();
+}
+
+async function loadCheckerEditor() {
+  try {
+    setPaletteForm(await paletteApi.load());
+    setCheckerStatus("Ready");
+  } catch (_error) {
+    setCheckerStatus("Failed to load background setting.");
+  }
+}
+
+async function saveCheckerEditor() {
+  const ok = await paletteApi.save(currentPalette());
+  setCheckerStatus(ok ? "Background saved." : "Failed to save background.");
+}
+
+async function restoreCheckerDefault() {
+  const ok = await paletteApi.save({ id: paletteApi.DEFAULT_ID });
+  if (!ok) {
+    setCheckerStatus("Failed to restore default background.");
+    return;
+  }
+
+  setPaletteForm(await paletteApi.load());
+  setCheckerStatus("Default background restored.");
+}
+
+if (paletteApi && presetSelect) {
+  buildPresetOptions();
+  presetSelect.addEventListener("change", renderPreview);
+  baseInput.addEventListener("input", renderPreview);
+  tileInput.addEventListener("input", renderPreview);
+  saveCheckerButton.addEventListener("click", saveCheckerEditor);
+  restoreCheckerButton.addEventListener("click", restoreCheckerDefault);
+  loadCheckerEditor();
+}
